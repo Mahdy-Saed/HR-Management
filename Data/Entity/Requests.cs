@@ -1,6 +1,6 @@
 ﻿using Org.BouncyCastle.Asn1.Mozilla;
 
-namespace HR_Carrer.Entity
+namespace HR_Carrer.Data.Entity
 {
     public class Requests
     {

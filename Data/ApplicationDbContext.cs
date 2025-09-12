@@ -1,4 +1,4 @@
-﻿using HR_Carrer.Entity;
+﻿using HR_Carrer.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Ocsp;
 

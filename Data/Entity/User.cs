@@ -1,6 +1,4 @@
-﻿using HR_Carrer.Entity;
-
-namespace HR_Carrer.Entity
+﻿namespace HR_Carrer.Data.Entity
 {
     public class User
     {
@@ -13,6 +11,9 @@ namespace HR_Carrer.Entity
         public string? PasswordHash { get; set; }
 
         public string? RefreshToken { get; set; }
+
+
+        public DateTime? RefreshTokenExpiryTime { get; set; }   
 
         public string? ImagePath { get; set; }
 

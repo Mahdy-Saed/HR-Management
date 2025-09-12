@@ -1,4 +1,4 @@
-﻿namespace HR_Carrer.Entity
+﻿namespace HR_Carrer.Data.Entity
 {
     public class Roadmap
     {

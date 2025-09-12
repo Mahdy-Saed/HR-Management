@@ -21,9 +21,6 @@ namespace HR_Carrer.Authntication
         private static HashAlgorithmName algorithmName = HashAlgorithmName.SHA512;
 
 
-
-
-
         public string Hash(string password)
         {
             byte[] salt = RandomNumberGenerator.GetBytes(saltSize);

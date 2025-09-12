@@ -1,7 +1,8 @@
 ﻿using HR_Carrer.Authentication;
 using HR_Carrer.Authntication;
 using HR_Carrer.Data;
-using HR_Carrer.Entity;
+using HR_Carrer.Data.Repositery;
+using HR_Carrer.Services.AuthService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Logging;
@@ -25,6 +26,9 @@ builder.Logging.AddFilter("Microsoft.IdentityModel", LogLevel.Trace);
 // Add services to the container.
 builder.Services.AddControllers().AddNewtonsoftJson();    // JSON Patch
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("jwtsettings")); // IOptions pattern
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
 //builder.Services.AddScoped<ITokenGenerater<User>, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

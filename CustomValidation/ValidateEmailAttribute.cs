@@ -11,7 +11,7 @@ namespace HR_Carrer.Validaion
         {
             var email = value as string; // this will try to cast the value to a string or null it it fails
 
-            var EmailRegex = @"[^@\s]+@[^@\s]+\.[^@\s]+";
+            var EmailRegex = @"[^@\s]+@[^@\s]+\.[^@\s]+";  
 
             if (email == null) return new ValidationResult("Email can not be empty");
 

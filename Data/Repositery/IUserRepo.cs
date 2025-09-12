@@ -1,4 +1,4 @@
-﻿using HR_Carrer.Entity;
+﻿using HR_Carrer.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_Carrer.Data.Repositery
@@ -13,8 +13,12 @@ namespace HR_Carrer.Data.Repositery
             Task<IEnumerable<User>> GetAllAsync();
 
             Task<User?> GetByIdAsync(Guid id);
+            Task<User?> GetByEmailAsync(string email);
 
-            Task UpdateAsync(User user);
+            Task<User?> GetByRefreshTokenAsync(string refreshToken);
+
+
+        Task UpdateAsync(User user);
 
             Task DeleteAsync(Guid id);
 
@@ -60,10 +64,22 @@ namespace HR_Carrer.Data.Repositery
             return await _context.Users.ToListAsync();
         }
 
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.Include(u=>u.Role).FirstOrDefaultAsync(u=>u.Email== email);
+
+
+        }
+
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            return await _context.Users.FindAsync(id);
+            return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
 
+        }
+
+        public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
+        {
+            return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
 
         public async Task UpdateAsync(User user)

@@ -1,4 +1,4 @@
-﻿namespace HR_Carrer.Data.Dto
+﻿namespace HR_Carrer.Dto
 {
     public class ChangePasswordDto
     {
