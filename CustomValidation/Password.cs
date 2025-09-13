@@ -8,8 +8,8 @@ namespace HR_Carrer.CustomValidation
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             var password = value as string;
-
-            var req = new Regex(@"^(?=.*[A-Za-z])\S{8,}$");
+            var pattern = @"^(?=.*[A-Za-z])\S{8,}$";
+            var req = new Regex(pattern);
 
 
             if (password  is not null && !req.IsMatch(password)){

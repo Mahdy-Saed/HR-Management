@@ -3,6 +3,7 @@ using HR_Carrer.Authntication;
 using HR_Carrer.Data;
 using HR_Carrer.Data.Repositery;
 using HR_Carrer.Services.AuthService;
+using HR_Carrer.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Logging;
@@ -24,13 +25,17 @@ builder.Logging.AddFilter("Microsoft.AspNetCore.Authentication.JwtBearer", LogLe
 builder.Logging.AddFilter("Microsoft.IdentityModel", LogLevel.Trace);
 
 // Add services to the container.
-builder.Services.AddControllers().AddNewtonsoftJson();    // JSON Patch
+builder.Services.AddControllers().AddNewtonsoftJson();    // JSON 
+
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("jwtsettings")); // IOptions pattern
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
-//builder.Services.AddScoped<ITokenGenerater<User>, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+//builder.Services.AddScoped<ITokenGenerater<User>, TokenGenerater>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
    options.UseNpgsql(builder.Configuration.GetConnectionString("PSQL_Connection")));
 builder.Services.AddAutoMapper(typeof(Program));

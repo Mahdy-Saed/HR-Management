@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR_Carrer.Data.Repositery
 {
+
+    // return only the User with Role here 
     public interface IUserRepo
     {
        
@@ -22,7 +24,7 @@ namespace HR_Carrer.Data.Repositery
 
             Task DeleteAsync(Guid id);
 
-            Task DeleteAllAsync();
+            Task<int> DeleteAllAsync();
 
 
     
@@ -43,10 +45,10 @@ namespace HR_Carrer.Data.Repositery
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAllAsync()
+        public async Task<int> DeleteAllAsync()
         {
               _context.Users.RemoveRange(_context.Users);
-            await _context.SaveChangesAsync();
+            return  await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid id)
@@ -61,7 +63,7 @@ namespace HR_Carrer.Data.Repositery
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users.Include(u=>u.Role).ToListAsync();
         }
 
         public async Task<User?> GetByEmailAsync(string email)
