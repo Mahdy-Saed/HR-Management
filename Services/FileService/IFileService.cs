@@ -6,8 +6,8 @@ namespace HR_Carrer.Services.FileService
 {
     public interface IFileService
     {
-        Task<string?> UploadImage(IFormFile? file);
-        Task<string?> UploadCertificate(IFormFile? file);
+        Task<string?> SaveImage(IFormFile? file);
+        Task<string?> SaveCertificate(IFormFile? file);
         string DeleteFile(string? filePath);
 
 
@@ -30,7 +30,7 @@ namespace HR_Carrer.Services.FileService
 
 
 
-        public async Task<string?> UploadCertificate(IFormFile? file)
+        public async Task<string?> SaveCertificate(IFormFile? file)
         {
             if (file is null) return null;
             var allowedExtensions = new[] { ".pdf", ".png" };
@@ -39,7 +39,7 @@ namespace HR_Carrer.Services.FileService
 
         }
 
-        public async Task<string?> UploadImage(IFormFile? file)
+        public async Task<string?> SaveImage(IFormFile? file)
         {
             if (file is null) return null;
             var allowedExtensions = new[] { ".jpg", ".png" };

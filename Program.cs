@@ -3,6 +3,7 @@ using HR_Carrer.Authntication;
 using HR_Carrer.Data;
 using HR_Carrer.Data.Repositery;
 using HR_Carrer.Services.AuthService;
+using HR_Carrer.Services.FileService;
 using HR_Carrer.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,7 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("jwtset
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 

@@ -11,7 +11,7 @@
 
 
 
-        // .............static  constructer heler............
+        // .............static  method  helper............
 
         public static ServiceResponce<T> Fail(string message, int statusCode)
            => new ServiceResponce<T>
