@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
-
 namespace HR_Carrer.Controllers
 {
+    [ApiExplorerSettings(GroupName = "v1")]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -29,7 +29,6 @@ namespace HR_Carrer.Controllers
             return StatusCode(res.StatusCode,res);
 
         }
-
         [Authorize(Roles = "User,Admin")]
         [HttpPost]
         [Route("Logout")]
@@ -44,7 +43,6 @@ namespace HR_Carrer.Controllers
         }
 
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         [Route("refresh-token")]
         public async Task<IActionResult> Refresh([FromBody] AuthRefeshDto auth)

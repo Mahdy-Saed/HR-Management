@@ -1,4 +1,5 @@
-﻿using HR_Carrer.Authntication;
+﻿using AutoMapper;
+using HR_Carrer.Authntication;
 using HR_Carrer.Data;
 using HR_Carrer.Data.Entity;
 using HR_Carrer.Data.Repositery;
@@ -6,16 +7,15 @@ using HR_Carrer.Dto.AuthDtos;
 using HR_Carrer.Dto.UserDtos;
 using HR_Carrer.Services.FileService;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HR_Carrer.Services.UserService
 {
     public interface IUserService
     {
 
-        Task<ServiceResponce<List<UserResponceDto>>> GetAllUsers();
-
-        Task<ServiceResponce<UserResponceDto>> GetUser(Guid id);
-
+        Task<ServiceResponce<List<UserResponceDto>>> GetAllUsers(Guid? id = null, string? name = null,
+                                                                string? email=null   , int pageNumber=1 ,int pageSize=10);
 
         Task<ServiceResponce<UserResponceDto>> CreateUser(UserRequestDto userRequestDto);
 
@@ -31,82 +31,54 @@ namespace HR_Carrer.Services.UserService
 
         Task<ServiceResponce<string>> DeleteAll();
 
-
-
     }
     public class UserService : IUserService
     {
 
         private readonly IUserRepo _userRepo;
-        private readonly IPasswordHasher _passwordHasher;
+         private readonly IPasswordHasher _passwordHasher;
         private readonly IFileService _fileService;
-        public UserService(IUserRepo userRepo, IPasswordHasher passwordHasher, IFileService fileService)
+        private readonly IMapper _mapper;
+        public UserService(IUserRepo userRepo, IPasswordHasher passwordHasher, IFileService fileService,IMapper mapper)
         {
             _userRepo = userRepo;
             _fileService = fileService;
             _passwordHasher = passwordHasher;
+            _mapper = mapper;
         }
+
+
+        // ...............................................(Create-User).....................................................
 
         public async Task<ServiceResponce<UserResponceDto>> CreateUser(UserRequestDto userRequestDto)
         {
- 
- 
-
             if (userRequestDto == null)
-            {
-                return ServiceResponce<UserResponceDto>.Fail("Must enter information ", 400);
-            }
+                return ServiceResponce<UserResponceDto>.Fail("Must enter information", 400);
 
             var existingUser = await _userRepo.GetByEmailAsync(userRequestDto.Email!);
-            if( existingUser is not null)
-            {
+            if (existingUser is not null)
+                return ServiceResponce<UserResponceDto>.Fail("User already exists", 409);
 
-                return ServiceResponce<UserResponceDto>.Fail("User is already Exist", 409);
- 
-            }
+            var user = _mapper.Map<User>(userRequestDto);
+            user.PasswordHash = _passwordHasher.Hash(userRequestDto.Password!);
+            var role = await _userRepo.Getrole(2); // get the role of User.
 
-            string? imagePath = string.Empty;
-            if (userRequestDto.Image is not null)
-            {
-                  imagePath = await _fileService.SaveImage( userRequestDto.Image);
-                if(imagePath is null)
-                {
-                    return ServiceResponce<UserResponceDto>.Fail("Invalid Image format. Only .jpg and .png are allowed.", 400);
-                }
-            
-            }
+            user.RoleId = role?.Id ?? 0;
+            user.Role = role;
 
-            var user = new User()
-            {
-                FullName = userRequestDto.FullName,
-                Email = userRequestDto.Email,
-                PasswordHash = _passwordHasher.Hash(userRequestDto.Password!),
-                 ImagePath = imagePath,
-                Status = userRequestDto.Status
-
-            };
-            user.Employee = new Employee()
-            {
-                UserId = user.Id,
-            };
             await _userRepo.AddAsync(user);
 
-            var responce = new UserResponceDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                ImagePath = user.ImagePath,
-                Status = user.Status,
-                Role = new RoleResponseDto
-                {
-                    Id = user.Role!.Id,
-                    Name = user.Role.Name
-                }
-            };
-            return ServiceResponce<UserResponceDto>.success(responce,"User created successfully ", 201);
-             
+            var responce = _mapper.Map<UserResponceDto>(user);
+ 
+            return ServiceResponce<UserResponceDto>.success(responce, "User Created Successfully", 201);
         }
+
+
+
+        // ...............................................(Delete-All-User).....................................................
+
+
+
         public async Task<ServiceResponce<string>> DeleteAll()
         {
             try
@@ -124,6 +96,9 @@ namespace HR_Carrer.Services.UserService
                 return ServiceResponce<string>.Fail("Failed to delete users", 500);
             }
         }
+// ...............................................(Delete-User).....................................................
+
+
 
         public async Task<ServiceResponce<string>> DeleteUser(Guid id)
         {
@@ -144,66 +119,25 @@ namespace HR_Carrer.Services.UserService
             }
         }
 
-        
+ // ...................................................(Get-ALl-Users).......................................................
 
-        public async Task<ServiceResponce<List<UserResponceDto>>> GetAllUsers()
+
+        public async Task<ServiceResponce<List<UserResponceDto>>> GetAllUsers(Guid? id = null, string? name = null, string? email = null, int pageNumber = 1, int pageSize = 10)
         {
- 
-            var users = await   _userRepo.GetAllAsync();
+            var query = await _userRepo.GetAllAsync(id,name,email);
 
-            if (users is null || !users.Any())
-            {
-                return ServiceResponce<List<UserResponceDto>>.Fail("User not found ", 404);
+            if (query is null || !query.Any())
+                return ServiceResponce<List<UserResponceDto>>.Fail("User not found", 404);
 
+            var pagedUser = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
-            }
-            var userDtos = users.Select(user => new UserResponceDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                ImagePath = user.ImagePath,
-                Status = user.Status,
-                Role = new RoleResponseDto
-                {
-                    Id = user.Role!.Id,
-                    Name = user.Role.Name
-                }
-            }).ToList();
+            var userDtos = _mapper.Map<List<UserResponceDto>>(pagedUser.ToList());
 
-            return ServiceResponce<List<UserResponceDto>>.success(userDtos,"Users retrieved successfully", 200);
+            return ServiceResponce<List<UserResponceDto>>.success(userDtos, "Users retrieved successfully", 200);
         }
 
+  // ...............................................(UPdate-User).....................................................
 
-
-
-        public async Task<ServiceResponce<UserResponceDto>> GetUser(Guid id)
-        {
- 
-            var user = await _userRepo.GetByIdAsync(id);
-            if(user is null)
-            {
-                return ServiceResponce<UserResponceDto>.Fail("User not found ", 404);
-
-
-                 
-            }
-            var responce = new UserResponceDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                ImagePath = user.ImagePath,
-                Status = user.Status,
-                Role = new RoleResponseDto
-                {
-                    Id = user.Role!.Id,
-                    Name = user.Role.Name
-                }
-            };
-             return ServiceResponce<UserResponceDto>.success(responce,"User retrieved successfully", 200);
-
-        }
 
         public async Task<ServiceResponce<UserResponceDto>> UpdateUser(Guid id, UserUpdateDto userUpdateDto)
         {
@@ -214,32 +148,23 @@ namespace HR_Carrer.Services.UserService
                 return ServiceResponce<UserResponceDto>.Fail("User not found ", 404);
 
             }
-            user.FullName = userUpdateDto.FullName ?? user.FullName;  // if the value is null keep the old value
-            user.Email = userUpdateDto.Email ?? user.Email;
-            user.Status = userUpdateDto.Status ?? user.Status;
+            user.FullName = userUpdateDto.NewFullName ?? user.FullName;  // if the value is null keep the old value
+            user.Email = userUpdateDto.NewEmail ?? user.Email;
+            user.Status = userUpdateDto.NewStatus ?? user.Status;
 
            
 
             await _userRepo.UpdateAsync(user);
-            
-            var responce = new UserResponceDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                ImagePath = user.ImagePath,
-                Status = user.Status,
-                Role = new RoleResponseDto
-                {
-                    Id = user.Role!.Id,
-                    Name = user.Role.Name
-                }
-            };
 
+            var responce = _mapper.Map < UserResponceDto>(user);
+ 
             return ServiceResponce<UserResponceDto>.success(responce, "User updated Sucessfully" ,200);
 
 
         }
+
+
+     // ...............................................(Update-part-User).....................................................
 
 
         public async Task<ServiceResponce<UserResponceDto>> PatchUser(Guid id, JsonPatchDocument<UserUpdateDto> patchDoc)
@@ -259,37 +184,27 @@ namespace HR_Carrer.Services.UserService
             //convert the current user to userDto to apply the patch of changes.
              var userDto = new UserUpdateDto
             {
-                FullName = user.FullName,
-                Email= user.Email,
-                 Status = user.Status
+                NewFullName = user.FullName,
+                NewEmail= user.Email,
+                 NewStatus = user.Status
             };
 
              patchDoc.ApplyTo(userDto);
 
-             user.FullName = userDto.FullName;
-             user.Email= userDto.Email;
-             user.Status = userDto.Status;
+             user.FullName = userDto.NewFullName;
+             user.Email= userDto.NewEmail;
+             user.Status = userDto.NewStatus;
 
             await _userRepo.UpdateAsync(user);
 
-            var responce = new UserResponceDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                ImagePath = user.ImagePath,
-                Status = user.Status,
-                Role = new RoleResponseDto
-                {
-                    Id = user.Role!.Id,
-                    Name = user.Role.Name
-                }
-            };
+            var responce = _mapper.Map<UserResponceDto>(user);
 
             
-
             return ServiceResponce<UserResponceDto>.success(responce, "User patched successfully", 200);
         }
+
+        //         // ...............................................(Upload-Image).....................................................
+
 
         public async Task<ServiceResponce<string>> UploadImage(Guid id, IFormFile Image)
         {
@@ -300,12 +215,17 @@ namespace HR_Carrer.Services.UserService
             if(Image is null) return ServiceResponce<string>.Fail("Image is required",400);
 
             string? ImagePath = string.Empty;
-            if (Image is not null)
+            if (Image is not null )
             {
-                 _fileService.DeleteFile(user.ImagePath);
+                if (!string.IsNullOrWhiteSpace(user.ImagePath))
+                    _fileService.DeleteFile(user.ImagePath);
 
                 ImagePath = await _fileService.SaveImage(Image);
 
+                if(ImagePath == "File type not allowed")
+                {
+                    return ServiceResponce<string>.Fail("File type not allowed", 400);
+                }
             }
 
             user.ImagePath = ImagePath ?? user.ImagePath;
@@ -317,6 +237,7 @@ namespace HR_Carrer.Services.UserService
 
         }
 
+           // ...............................................(Delete-Image).....................................................
         public async Task<ServiceResponce<string>> DeleteImage(Guid id)
         {
             var user = await _userRepo.GetByIdAsync(id);
@@ -336,6 +257,7 @@ namespace HR_Carrer.Services.UserService
 
 
         }
+        
     }
 
 

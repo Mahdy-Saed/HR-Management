@@ -1,4 +1,6 @@
-﻿namespace HR_Carrer.Data.Entity
+﻿using System.Text.Json.Serialization;
+
+namespace HR_Carrer.Data.Entity
 {
     public class Role
     {
@@ -10,7 +12,9 @@
 
         // Navigation Relationship  
 
-        public User User { get; set; }  //one to one relationship
+
+        [JsonIgnore]
+        public ICollection <User> Users { get; set; }  // many-to-one relationship
 
     }
 }

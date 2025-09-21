@@ -1,6 +1,7 @@
 ﻿using HR_Carrer.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace HR_Carrer.Data
 {
@@ -8,6 +9,18 @@ namespace HR_Carrer.Data
     {
         public static  void ConfigureRelationship(this ModelBuilder modleBuilder)
         {
+            modleBuilder.Entity<User>(builder =>
+            {
+                builder.HasKey(u => u.Id);
+                //Configure one-to-one relationship between User and Employee
+                builder.HasOne(u => u.Employee).WithOne(e => e.User).HasForeignKey<Employee>(e => e.UserId);
+                //Configure one-to-many relationship between User and Role
+                builder.HasOne(u => u.Role).WithMany(r => r.Users).HasForeignKey(u => u.RoleId);
+            }
+            );
+
+
+
             modleBuilder.Entity<Employee>(builder =>
             {
 

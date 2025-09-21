@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Http.Metadata;
+﻿using HR_Carrer.CustomValidation;
+using Microsoft.AspNetCore.Http.Metadata;
 using System.ComponentModel.DataAnnotations;
 
 namespace HR_Carrer.Dto.UserDtos
 {
     public class UserRequestDto
     {
-
+        [FullName]
         [Required(ErrorMessage = "FullName is required")]
         [MaxLength(100, ErrorMessage = "FullName can't be longer than 100 characters")]
         public string? FullName { get; set; }
@@ -21,18 +22,8 @@ namespace HR_Carrer.Dto.UserDtos
         public string? Password { get; set; }
 
 
-        public IFormFile? Image { get; set; }
-
-        public UserRole Role  { get; set; }= UserRole.Employee;
-
-        public bool? Status { get; set; } = true;
-
     }
 
-    public enum UserRole
-    {
-        Admin = 1,
-        Employee = 2
-    }   
+  
 }
  

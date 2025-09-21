@@ -23,7 +23,7 @@
         // Navigation Relationship
         public Employee? Employee { get; set; }
         public int RoleId { get; set; }
-        public Role? Role { get; set; }
+        public Role? Role { get; set; }      // Id =1 admin, Id=2 employee                ||     spongpop roldie=Id   rainmaster roleid=id
 
 
 

@@ -20,8 +20,10 @@ namespace HR_Carrer.Services.FileService
 
         public FileService(IWebHostEnvironment env)
         {
-            _CertificateDirectory = Path.Combine(env.WebRootPath, "Certificates");
-            _ImageDirectory = Path.Combine(env.WebRootPath, "Images");
+            var rootPath = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            _CertificateDirectory = Path.Combine(rootPath, "Certificates");
+            _ImageDirectory = Path.Combine(rootPath, "Images");
 
 
             Directory.CreateDirectory(_CertificateDirectory);
@@ -76,7 +78,7 @@ namespace HR_Carrer.Services.FileService
 
         }
 
-        private   async Task<string?> SaveFile(IFormFile file, string SaveDirectory, string[] allowedExtensions )
+        private async Task<string?> SaveFile(IFormFile file, string SaveDirectory, string[] allowedExtensions)
         {
             var extension = Path.GetExtension(file.FileName).ToLower();
             var originalName = Path.GetFileNameWithoutExtension(file.FileName);
@@ -110,7 +112,7 @@ namespace HR_Carrer.Services.FileService
 
     }
 
-    }
+}
 
 
 

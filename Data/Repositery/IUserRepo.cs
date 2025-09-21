@@ -12,8 +12,8 @@ namespace HR_Carrer.Data.Repositery
             // add , get, update, delete              //task mean return nothing but if write it like this Task<T> mean return this type of T
             Task AddAsync(User user);
 
-            Task<IEnumerable<User>> GetAllAsync();
-
+            Task<IEnumerable<User>> GetAllAsync(Guid? id=null, string? name = null, string? Email = null);
+                  Task<Role?> Getrole(int id);
             Task<User?> GetByIdAsync(Guid id);
             Task<User?> GetByEmailAsync(string email);
 
@@ -61,9 +61,18 @@ namespace HR_Carrer.Data.Repositery
             }
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync()
+        public async Task<IEnumerable<User>> GetAllAsync(Guid? id = null, string? name = null, string? Email = null)
         {
-            return await _context.Users.Include(u=>u.Role).ToListAsync();
+            var query =  _context.Users.Include(u => u.Role).AsQueryable();
+
+
+            query = id.HasValue ? query.Where(u => u.Id == id.Value) : query;
+
+            query = !string.IsNullOrWhiteSpace(name)? query.Where(u => u.FullName != null && u.FullName.Contains(name)) : query;
+
+            query = !string.IsNullOrWhiteSpace(Email) ? query.Where(u => u.Email != null && u.Email.Contains(Email)) : query;
+
+            return await query.ToListAsync();
         }
 
         public async Task<User?> GetByEmailAsync(string email)
@@ -83,6 +92,8 @@ namespace HR_Carrer.Data.Repositery
         {
             return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
+
+        public async Task<Role?> Getrole(int id) => await _context.Roles.FindAsync(id);
 
         public async Task UpdateAsync(User user)
         {

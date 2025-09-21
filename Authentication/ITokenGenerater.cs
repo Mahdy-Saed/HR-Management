@@ -36,7 +36,7 @@ namespace HR_Carrer.Authntication
             
             List<Claim> claims = new List<Claim>{
                 new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
-                 new Claim("Role",user.Role?.Name?? ""),
+                 new Claim(ClaimTypes.Role,user.Role?.Name?? ""),
             };
 
             byte[] key = Encoding.UTF8.GetBytes(_jwtsetting.Value.Key!); // GET THE KEY FROM THE SETTING .value for access the Original Class 

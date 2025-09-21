@@ -1,6 +1,7 @@
 ﻿using HR_Carrer.Dto.UserDtos;
 using HR_Carrer.Services.FileService;
 using HR_Carrer.Services.UserService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.JsonPatch;
@@ -9,19 +10,24 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HR_Carrer.Controllers
 {
+    [ApiExplorerSettings(GroupName = "v1")]
+
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-         public UserController(IUserService userService,IFileService fileService)
+         public UserController(IUserService userService)
         {
             _userService = userService;
         }
 
-        [ApiExplorerSettings(GroupName ="1")]
-        [HttpPost("CreateUser")]
-        public async Task<IActionResult> CreateUser([FromForm] UserRequestDto userRequestDto)
+
+        //................................................(Create-User).....................................................
+
+        [Authorize(Roles = "Admin")]
+         [HttpPost("Create")]
+        public async Task<IActionResult> CreateUser([FromBody] UserRequestDto userRequestDto)
         {
             if (userRequestDto == null)
             {
@@ -29,15 +35,19 @@ namespace HR_Carrer.Controllers
             }
             var responce = await _userService.CreateUser(userRequestDto);
 
-            return CreatedAtAction(nameof(GetUsers), new { id = responce.Data?.Id }, responce);
+            return StatusCode(responce.StatusCode, responce);
             
         }
 
-        [ApiExplorerSettings(GroupName = "2")]
-        [HttpGet("Users")]
-        public async Task<IActionResult> GetUsers()
+        //................................................(Get-All-Users).....................................................
+
+        [Authorize(Roles = "Admin")]
+         [HttpGet("Users")]
+        public async Task<IActionResult> GetUsers([FromQuery] Guid? id , [FromQuery] string? name ,[FromQuery] string? email,
+                                                    [FromQuery] int pageNumber = 1,    [FromQuery] int pageSize = 10 )
         {
-            var res = await _userService.GetAllUsers();
+
+            var res = await _userService.GetAllUsers(id,name,email,pageNumber,pageSize);
             if (res == null)
             {
                 return NotFound(res); 
@@ -45,22 +55,11 @@ namespace HR_Carrer.Controllers
             return StatusCode(res.StatusCode, res);
         }
 
-
-        [ApiExplorerSettings(GroupName = "3")]
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(Guid id)
-        {
-            var res = await _userService.GetUser(id);
-            if (res == null)
-            {
-                return NotFound(res); 
-            }
-            return StatusCode(res.StatusCode, res);
-        }
+        //................................................(Update-User).....................................................
 
 
-        [ApiExplorerSettings(GroupName = "4")]
-        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+         [HttpPut("{id}")]
         public async Task<IActionResult>UpdateUser( Guid id , [FromBody] UserUpdateDto userUpdateDto)
         {
             if(userUpdateDto == null)
@@ -71,12 +70,10 @@ namespace HR_Carrer.Controllers
 
             return StatusCode(responce.StatusCode, responce);
         }
+        //................................................(Patch-User).....................................................
 
-
-
-        [ApiExplorerSettings(GroupName = "5")]
-
-        [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
+         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateSepcific(Guid id, [FromBody] JsonPatchDocument< UserUpdateDto> userUpdateDto)
         {
             if (userUpdateDto == null)
@@ -88,8 +85,9 @@ namespace HR_Carrer.Controllers
             return StatusCode(responce.StatusCode, responce);
         }
 
-        [ApiExplorerSettings(GroupName = "6")]
-        [HttpDelete("{id}")]
+        //................................................(Delete-User).....................................................
+        [Authorize(Roles = "Admin")]
+         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             if(id == Guid.Empty)   return BadRequest("Invalid user id.");
@@ -99,42 +97,17 @@ namespace HR_Carrer.Controllers
             return StatusCode(responce.StatusCode, responce);
         }
 
-        [ApiExplorerSettings(GroupName = "7")]
-        [HttpDelete("DeleteAll")]
+        //................................................(Delete-All-Users).....................................................
+
+        [Authorize(Roles = "Admin")]
+         [HttpDelete("DeleteAll")]
         public async Task<IActionResult> DeleteAllUsers()
         {
             var responce = await _userService.DeleteAll();
             return StatusCode(responce.StatusCode, responce);
         }
 
-        [ApiExplorerSettings(GroupName = "8")]
-        [HttpPost("{id}/Upload-Image")]
-        public async Task<IActionResult> UploadImage(Guid id, IFormFile Image)
-        {
-            if (id == Guid.Empty || Image == null)
-            {
-                return BadRequest("Invalid data.");
-            }
-            var responce = await _userService.UploadImage(id, Image);
-
-            return StatusCode(responce.StatusCode, responce);
-
-        }
-
-
-
-        [ApiExplorerSettings(GroupName = "9")]
-        [HttpDelete("{id}/Delete-Image")]        
-        public async Task<IActionResult> DeleteImage([Required] Guid id, [FromBody, Required] UserUpdateDto userUpdateDto)
-        {
-            if (userUpdateDto == null)
-            {
-                return BadRequest("Invalid user data.");
-            }
-            var responce = await _userService.UpdateUser(id, userUpdateDto);
-
-            return StatusCode(responce.StatusCode, responce);
-        }
+      
 
 
     }

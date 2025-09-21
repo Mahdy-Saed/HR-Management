@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace HR_Carrer.CustomValidation
 {
-    public class Password:ValidationAttribute
+    public class PasswordAttribute:ValidationAttribute
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {

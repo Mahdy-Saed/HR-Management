@@ -2,6 +2,7 @@
 using HR_Carrer.Authntication;
 using HR_Carrer.Data;
 using HR_Carrer.Data.Repositery;
+using HR_Carrer.Services.AttachmentService;
 using HR_Carrer.Services.AuthService;
 using HR_Carrer.Services.FileService;
 using HR_Carrer.Services.UserService;
@@ -10,138 +11,112 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ تمكين عرض معلومات حساسة في الأخطاء - مهم جداً في مرحلة التطوير
-IdentityModelEventSource.ShowPII = true;
+// ------------------- Logging -------------------
+// Enable Serilog from appsettings.json
+builder.Host.UseSerilog((context, configurations) =>
+    configurations.ReadFrom.Configuration(context.Configuration));
 
-// ✅ إعدادات Logging تفصيلي
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
-builder.Logging.AddFilter("Microsoft.AspNetCore.Authentication.JwtBearer", LogLevel.Trace);
-builder.Logging.AddFilter("Microsoft.IdentityModel", LogLevel.Trace);
+// ------------------- Services -------------------
+builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("jwtsettings"));
 
-// Add services to the container.
-builder.Services.AddControllers().AddNewtonsoftJson();    // JSON 
-
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("jwtsettings")); // IOptions pattern
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-
-//builder.Services.AddScoped<ITokenGenerater<User>, TokenGenerater>();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-   options.UseNpgsql(builder.Configuration.GetConnectionString("PSQL_Connection")));
+builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(Program));
 
+// ------------------- Data Connection -------------------
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PSQL_Connection")));
 
-// Setting JWT
-var jwtSettings = builder.Configuration.GetSection("jwtsettings");
-var key = jwtSettings["Key"];
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+// ------------------- JWT Setting -------------------
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
-        ClockSkew = TimeSpan.Zero
-    };
-
-    // ✅ تمكين التفاصيل في حالة فشل المصادقة
-    options.IncludeErrorDetails = true;
-
-    // ✅ تسجيل الأحداث لمزيد من التشخيص
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
+        var jwtSettings = builder.Configuration.GetSection("jwtsettings");
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            Console.WriteLine($" Authentication failed: {context.Exception.GetType().Name} - {context.Exception.Message}");
-            return Task.CompletedTask;
-        },
-        OnTokenValidated = context =>
-        {
-            Console.WriteLine($" Token validated for: {context.Principal.Identity?.Name}");
-            return Task.CompletedTask;
-        }
-    };
-});
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
+            ClockSkew = TimeSpan.Zero
+        };
+        options.IncludeErrorDetails = true;
+    });
 
+// ------------------- Swagger -------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "API",
-        Version = "v1",
-        Description = "API for managing ",
-    });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API v1", Version = "v1", Description = "An API for beautiful HR system" });
 
+    // Bearer Token Authentication
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Just Enter Your Token Here"
+        In = ParameterLocation.Header
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
+            { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }},
+            Array.Empty<string>()
         }
     });
 
-    c.DocInclusionPredicate((docname, apiDesc) =>
+    // Grouping & ordering endpoints
+    c.DocInclusionPredicate((docName, apiDesc) =>
     {
-        return docname == "v1";
+        var groupName = apiDesc.GroupName ?? "v1";
+        return docName == groupName;
     });
-
-    c.OrderActionsBy(endpoint => endpoint.GroupName ?? "");
+    c.OrderActionsBy(apiDesc => apiDesc.RelativePath); // ترتيب الـ endpoints حسب المسار
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ------------------- Middlewares -------------------
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($" Request: {context.Request.Method} {context.Request.Path}");
+    await next();
+    Console.WriteLine($"⬅ Response: {context.Response.StatusCode}");
+});
+
+// Enable CORS
+app.UseRouting();
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+// Enable Serilog HTTP request logging
+app.UseSerilogRequestLogging();
+
+// ------------------- Configure HTTP pipeline -------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1");
-    });
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1"));
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication(); // ✅ مهم قبل Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

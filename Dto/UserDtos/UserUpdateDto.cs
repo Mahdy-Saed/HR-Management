@@ -1,17 +1,23 @@
 ﻿using HR_Carrer.Data.Entity;
+using System.ComponentModel.DataAnnotations;
 
 namespace HR_Carrer.Dto.UserDtos
 {
     public class UserUpdateDto
-    { 
+    {
 
 
-            public string? FullName { get; set; }
+          [Required(ErrorMessage ="must Enter the New Name")]
+           [MaxLength(255)]  
+            public string? NewFullName { get; set; }
 
-            public string? Email { get; set; }
 
- 
-            public bool? Status { get; set; } = true;
+        [Required(ErrorMessage = "must Enter the New Email")]
+        [EmailAddress(ErrorMessage ="must Enter the Right format of Email")]
+            public string? NewEmail { get; set; }
+
+
+            public bool? NewStatus { get; set; } = true;
 
           
 
