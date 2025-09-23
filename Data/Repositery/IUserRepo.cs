@@ -63,7 +63,7 @@ namespace HR_Carrer.Data.Repositery
 
         public async Task<IEnumerable<User>> GetAllAsync(Guid? id = null, string? name = null, string? Email = null)
         {
-            var query =  _context.Users.Include(u => u.Role).AsQueryable();
+            var query =  _context.Users.Include(u => u.Role).Include(u=>u.Employee).AsQueryable();
 
 
             query = id.HasValue ? query.Where(u => u.Id == id.Value) : query;
@@ -84,7 +84,7 @@ namespace HR_Carrer.Data.Repositery
 
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.Users.Include(u => u.Role).Include(u=>u.Employee).FirstOrDefaultAsync(u => u.Id == id);
 
         }
 

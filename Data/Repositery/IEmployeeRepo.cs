@@ -59,7 +59,7 @@ namespace HR_Carrer.Data.Repositery
 
         public async Task<Employee?> GetByIdAsync(Guid id)
         {
-            return await  _context.Employees.FirstOrDefaultAsync(em => em.UserId == id);
+            return await  _context.Employees.Include(e=>e.User).FirstOrDefaultAsync(em => em.UserId == id);
         }
 
         public async Task UpdateAsync(Employee employee)

@@ -14,7 +14,7 @@ namespace HR_Carrer.Services.UserService
     public interface IUserService
     {
 
-        Task<ServiceResponce<List<UserResponceDto>>> GetAllUsers(Guid? id = null, string? name = null,
+        Task<ServiceResponce<PagedResultDto<UserResponceDto>>> GetAllUsers(Guid? id = null, string? name = null,
                                                                 string? email=null   , int pageNumber=1 ,int pageSize=10);
 
         Task<ServiceResponce<UserResponceDto>> CreateUser(UserRequestDto userRequestDto);
@@ -122,18 +122,31 @@ namespace HR_Carrer.Services.UserService
  // ...................................................(Get-ALl-Users).......................................................
 
 
-        public async Task<ServiceResponce<List<UserResponceDto>>> GetAllUsers(Guid? id = null, string? name = null, string? email = null, int pageNumber = 1, int pageSize = 10)
+        public async Task<ServiceResponce<PagedResultDto<UserResponceDto>>> GetAllUsers(Guid? id = null, string? name = null, string? email = null, int pageNumber = 1, int pageSize = 10)
         {
             var query = await _userRepo.GetAllAsync(id,name,email);
 
             if (query is null || !query.Any())
-                return ServiceResponce<List<UserResponceDto>>.Fail("User not found", 404);
+                return ServiceResponce<PagedResultDto<UserResponceDto>>.Fail("User not found", 404);
 
+            if(pageNumber <= 0) pageNumber = 1;
+
+            var totalCount = query.Count();
+            var totalPages =(int) Math.Ceiling(totalCount / (double)pageSize);
             var pagedUser = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
             var userDtos = _mapper.Map<List<UserResponceDto>>(pagedUser.ToList());
 
-            return ServiceResponce<List<UserResponceDto>>.success(userDtos, "Users retrieved successfully", 200);
+            var responce= new PagedResultDto<UserResponceDto>
+            {
+                Items = userDtos,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages
+            };
+
+            return ServiceResponce<PagedResultDto<UserResponceDto>>.success(responce, "Users retrieved successfully", 200);
         }
 
   // ...............................................(UPdate-User).....................................................
@@ -164,9 +177,9 @@ namespace HR_Carrer.Services.UserService
         }
 
 
-     // ...............................................(Update-part-User).....................................................
+        // ...............................................(Update-part-User).....................................................
 
-
+    
         public async Task<ServiceResponce<UserResponceDto>> PatchUser(Guid id, JsonPatchDocument<UserUpdateDto> patchDoc)
         {
  

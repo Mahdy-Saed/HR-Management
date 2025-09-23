@@ -4,6 +4,7 @@ using HR_Carrer.Data;
 using HR_Carrer.Data.Repositery;
 using HR_Carrer.Services.AttachmentService;
 using HR_Carrer.Services.AuthService;
+using HR_Carrer.Services.EmployeeService;
 using HR_Carrer.Services.FileService;
 using HR_Carrer.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,6 +33,8 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -82,13 +85,11 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Grouping & ordering endpoints
-    c.DocInclusionPredicate((docName, apiDesc) =>
-    {
-        var groupName = apiDesc.GroupName ?? "v1";
-        return docName == groupName;
-    });
-    c.OrderActionsBy(apiDesc => apiDesc.RelativePath); // ترتيب الـ endpoints حسب المسار
+
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
 });
 
 var app = builder.Build();
@@ -109,10 +110,11 @@ app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 app.UseSerilogRequestLogging();
 
 // ------------------- Configure HTTP pipeline -------------------
+app.UseStaticFiles();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1"));
+    app.UseSwaggerUI(c => { c.InjectStylesheet("/Custom.css"); c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1");   });
 }
 
 app.UseHttpsRedirection();

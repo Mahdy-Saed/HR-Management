@@ -8,8 +8,7 @@
 
 
         //Navigaton relasionship
-        public ICollection<Certificates>? Certificates { get; set; }= new List<Certificates>();
-
+ 
         public int RoadmapId { get; set; }  
         public Roadmap Roadmap { get; set; }  // many to one
 

@@ -18,12 +18,11 @@
 
 
         //Navigation relasionship
-        public ICollection<Steps>? steps { get; set; }
-
+ 
         public Guid EmployeeId { get; set; }
         public Employee Employee { get; set; }
 
-
+        public ICollection<Skills> Skills { get; set; }=new List<Skills>(); // many to many
 
     }
 

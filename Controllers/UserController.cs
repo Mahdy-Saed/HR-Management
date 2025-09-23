@@ -21,12 +21,10 @@ namespace HR_Carrer.Controllers
         {
             _userService = userService;
         }
-
-
         //................................................(Create-User).....................................................
 
         [Authorize(Roles = "Admin")]
-         [HttpPost("Create")]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateUser([FromBody] UserRequestDto userRequestDto)
         {
             if (userRequestDto == null)
@@ -42,7 +40,7 @@ namespace HR_Carrer.Controllers
         //................................................(Get-All-Users).....................................................
 
         [Authorize(Roles = "Admin")]
-         [HttpGet("Users")]
+        [HttpGet("Users")]
         public async Task<IActionResult> GetUsers([FromQuery] Guid? id , [FromQuery] string? name ,[FromQuery] string? email,
                                                     [FromQuery] int pageNumber = 1,    [FromQuery] int pageSize = 10 )
         {
@@ -71,6 +69,13 @@ namespace HR_Carrer.Controllers
             return StatusCode(responce.StatusCode, responce);
         }
         //................................................(Patch-User).....................................................
+
+        /// /// <param name="userUpdateDto">
+        /// - /NewFullName → For update FullName
+        /// - /NewEmail → For update Email
+        /// - /NewStatus → For update status
+        /// </param>
+        /// /// <returns>will return the User with new information </returns>
 
         [Authorize(Roles = "Admin")]
          [HttpPatch("{id}")]

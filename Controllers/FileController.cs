@@ -20,7 +20,7 @@ namespace HR_Carrer.Controllers
         //................................................(Upload-Image).....................................................
 
         [Authorize(Roles = "Admin,User")]
-         [HttpPost("Upload-Image")]
+         [HttpPost("Upload-Profile-Image")]
         public async Task<IActionResult>UploadImage( IFormFile Image, [FromQuery] Guid? id = null)
         {
             Guid finalId;
@@ -33,7 +33,7 @@ namespace HR_Carrer.Controllers
 
             if (User.IsInRole("Admin"))
             {
-                if(id == null) return BadRequest("Id is required for Admin.");
+                if(id == null) return BadRequest("Id of user  is required for Admin.");
 
                 finalId = id.Value;
             }
@@ -55,7 +55,7 @@ namespace HR_Carrer.Controllers
         //................................................(Delete-Image).....................................................
 
         [Authorize(Roles = "Admin,User")]
-         [HttpDelete("Delete-Image")]
+         [HttpDelete("Delete-Profile-Image")]
         public async Task<IActionResult> Deletmage([FromQuery] Guid? id = null)
         {
 

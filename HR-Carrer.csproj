@@ -7,6 +7,12 @@
 		<RootNamespace>HR_Carrer</RootNamespace>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<DocumentationFile></DocumentationFile>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<!-- AutoMapper for mapping DTOs -->
 		<PackageReference Include="AutoMapper" Version="12.0.0" />

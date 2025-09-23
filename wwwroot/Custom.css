@@ -1,0 +1,9 @@
+﻿.opblock .opblock-body .opblock-description-wrapper
+.opblock-description .renderedMarkdown p {
+    color: red;
+    font-weight: bold;
+}
+.opblock-body .opblock-description-wrapper .opblock-description .renderedMarkdown{
+        background-color: yellow;
+}
+}

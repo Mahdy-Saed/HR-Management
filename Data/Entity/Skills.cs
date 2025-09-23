@@ -12,7 +12,7 @@
         public int? point { get; set; } = 0;
 
         // Navigation Relationship
-        public ICollection<Employee>? Employees { get; set; }
+        public ICollection<Certificates> Certificates { get; set; } = new List<Certificates>(); // many to many
 
     }
 

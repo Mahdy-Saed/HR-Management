@@ -19,7 +19,6 @@ namespace HR_Carrer.Data.Entity
         public User? User { get; set; }
         public ICollection<Requests>? Requests { get; set; }=new List<Requests>(); // one to many
 
-        public ICollection<Skills>? Skills { get; set; }= new List<Skills>();   // many to many..
 
         public ICollection<Certificates>? Certificates { get; set; }=new List<Certificates>(); // one to many 
          
