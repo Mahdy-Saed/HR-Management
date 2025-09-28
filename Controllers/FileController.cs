@@ -1,4 +1,5 @@
-﻿using HR_Carrer.Services.AttachmentService;
+﻿using HR_Carrer.Services.RequestService;
+using HR_Carrer.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,13 +12,15 @@ namespace HR_Carrer.Controllers
     [ApiController]
     public class FileController : ControllerBase
     {
-        private readonly IAttachmentService _attachmentService;
-        public FileController(IAttachmentService attachmentService)
+        private readonly IUserService _userService;
+        private readonly IRequestService _requestService;
+        public FileController( IRequestService requestService,IUserService userService)
         {
-            _attachmentService = attachmentService;
+             _requestService = requestService;
+            _userService= userService;
         }
 
-        //................................................(Upload-Image).....................................................
+        //................................................(Upload-profile-Image).....................................................
 
         [Authorize(Roles = "Admin,User")]
          [HttpPost("Upload-Profile-Image")]
@@ -47,14 +50,14 @@ namespace HR_Carrer.Controllers
                 finalId = useriId; 
 
             }
-            var responce = await _attachmentService.UploadImage(finalId, Image);
+            var responce = await _userService.UploadProfileImage(finalId, Image);
 
             return StatusCode(responce.StatusCode, responce);
         }
 
-        //................................................(Delete-Image).....................................................
+        //................................................(Delete-profile-Image).....................................................
 
-        [Authorize(Roles = "Admin,User")]
+          [Authorize(Roles = "Admin,User")]
          [HttpDelete("Delete-Profile-Image")]
         public async Task<IActionResult> Deletmage([FromQuery] Guid? id = null)
         {
@@ -75,10 +78,36 @@ namespace HR_Carrer.Controllers
                 finalId = useriId;
             }
 
-            var responce = await _attachmentService.DeleteImage(finalId);
+            var responce = await _userService.DeleteProfileImage(finalId);
             return StatusCode(responce.StatusCode, responce);
         }
+        //................................................(Upload-Request-Image).....................................................
+        [Authorize(Roles = "User")]
+        [HttpPost("Upload-Request-Image")]
+        public async Task<IActionResult> UploadRequestImage(int id,IFormFile Image)
+        {
+            if (Image == null || Image.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }           
+                //if (!this.TryGetUserId(out Guid EmployeeId))
+                //{
+                //    return Unauthorized("Authorization-Error: Employee ID is not valid.");
+                //}   
+            var responce = await _requestService.UploadRequestImage(id, Image);
+            return StatusCode(responce.StatusCode, responce);
+        }
+        //...................................................(Delete-Request-Image)......................................................
+        [HttpDelete("Delete-Request-Image")]
+         public async Task<IActionResult> DeleteRequestImage(int id)
+        {
+            if ( id == 0) return BadRequest("Must Enter id");
 
+            var result = await _requestService.DeleteRequestImage(id);
+
+                return StatusCode(result.StatusCode, result);
+
+        }
 
     }
 }

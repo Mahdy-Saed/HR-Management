@@ -23,9 +23,9 @@ namespace HR_Carrer.Services.UserService
 
         Task<ServiceResponce<UserResponceDto>> PatchUser(Guid id, JsonPatchDocument<UserUpdateDto> userUpdateDto);
 
-        Task<ServiceResponce<string>> UploadImage(Guid id, IFormFile Image);
+        Task<ServiceResponce<string>> UploadProfileImage(Guid id, IFormFile Image);
 
-         Task<ServiceResponce<string>> DeleteImage(Guid id);
+         Task<ServiceResponce<string>> DeleteProfileImage(Guid id);
 
         Task<ServiceResponce<string>> DeleteUser(Guid id);
 
@@ -107,8 +107,12 @@ namespace HR_Carrer.Services.UserService
                 var user = await _userRepo.GetByIdAsync(id);
                 if (user is null)
                     return ServiceResponce<string>.Fail("User not found", 404);
+                if(user.ImagePath is not null)
+                {
+                      _fileService.DeleteFile(user.ImagePath);
+                }
 
-                await _userRepo.DeleteAsync(id);
+                    await _userRepo.DeleteAsync(id);
 
                 return ServiceResponce<string>.success("User deleted successfully", "", 200);
             }
@@ -218,41 +222,37 @@ namespace HR_Carrer.Services.UserService
 
         //         // ...............................................(Upload-Image).....................................................
 
-
-        public async Task<ServiceResponce<string>> UploadImage(Guid id, IFormFile Image)
+        public async Task<ServiceResponce<string>> UploadProfileImage(Guid id, IFormFile Image)
         {
-            
             var user = await _userRepo.GetByIdAsync(id);
-            if(user is null) return ServiceResponce<string>.Fail("User not found",404);
+            if (user is null) return ServiceResponce<string>.Fail("User not found", 404);
 
-            if(Image is null) return ServiceResponce<string>.Fail("Image is required",400);
+            if (Image is null) return ServiceResponce<string>.Fail("Image is required", 400);
 
             string? ImagePath = string.Empty;
-            if (Image is not null )
+            if (Image is not null)
             {
                 if (!string.IsNullOrWhiteSpace(user.ImagePath))
                     _fileService.DeleteFile(user.ImagePath);
 
                 ImagePath = await _fileService.SaveImage(Image);
 
-                if(ImagePath == "File type not allowed")
+                if (ImagePath == "File type not allowed")
                 {
                     return ServiceResponce<string>.Fail("File type not allowed", 400);
                 }
             }
-
             user.ImagePath = ImagePath ?? user.ImagePath;
 
             await _userRepo.UpdateAsync(user);
-
-
-            return ServiceResponce<string>.success(user.ImagePath!, "Image updated successfully", 200);
-
+            return ServiceResponce<string>.success(user.ImagePath!, "Image Uploaded ccessfully", 200);
         }
 
-           // ...............................................(Delete-Image).....................................................
-        public async Task<ServiceResponce<string>> DeleteImage(Guid id)
+
+        // ...............................................(Delete-Image).....................................................
+        public async Task<ServiceResponce<string>> DeleteProfileImage(Guid id)
         {
+
             var user = await _userRepo.GetByIdAsync(id);
             if (user is null) return ServiceResponce<string>.Fail("User not found", 404);
 
@@ -261,16 +261,17 @@ namespace HR_Carrer.Services.UserService
                 return ServiceResponce<string>.Fail("No image to delete", 400);
             }
 
-            _fileService.DeleteFile(user.ImagePath);
-
+            var result = _fileService.DeleteFile(user.ImagePath);
+            if (result == "Invalid Path" || result == "File Not Found")
+            {
+                return ServiceResponce<string>.Fail("Invalid image path or the file not found", 400);
+            }
             user.ImagePath = null;
-
             await _userRepo.UpdateAsync(user);
+
             return ServiceResponce<string>.success("Image deleted successfully", "", 200);
-
-
         }
-        
+
     }
 
 

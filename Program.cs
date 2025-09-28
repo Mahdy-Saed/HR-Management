@@ -2,18 +2,20 @@
 using HR_Carrer.Authntication;
 using HR_Carrer.Data;
 using HR_Carrer.Data.Repositery;
-using HR_Carrer.Services.AttachmentService;
 using HR_Carrer.Services.AuthService;
 using HR_Carrer.Services.EmployeeService;
 using HR_Carrer.Services.FileService;
+using HR_Carrer.Services.RequestService;
 using HR_Carrer.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,14 +25,16 @@ builder.Host.UseSerilog((context, configurations) =>
     configurations.ReadFrom.Configuration(context.Configuration));
 
 // ------------------- Services -------------------
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllersWithViews() // or AddControllers() in a Web API
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("jwtsettings"));
-
+builder.Services.AddScoped<IRequestRepo, RequestRepo>();
+builder.Services.AddScoped<IRequestService, ReqeustService>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
@@ -83,7 +87,12 @@ builder.Services.AddSwaggerGen(c =>
             { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }},
             Array.Empty<string>()
         }
+
     });
+
+
+       c.UseInlineDefinitionsForEnums();
+
 
 
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";

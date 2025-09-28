@@ -65,7 +65,6 @@ namespace HR_Carrer.Data.Repositery
         {
             var query =  _context.Users.Include(u => u.Role).Include(u=>u.Employee).AsQueryable();
 
-
             query = id.HasValue ? query.Where(u => u.Id == id.Value) : query;
 
             query = !string.IsNullOrWhiteSpace(name)? query.Where(u => u.FullName != null && u.FullName.Contains(name)) : query;

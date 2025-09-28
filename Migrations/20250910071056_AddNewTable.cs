@@ -61,7 +61,8 @@ namespace HR_Carrer.Migrations
                     ImagePath = table.Column<string>(type: "text", nullable: true),
                     Request_Date = table.Column<DateOnly>(type: "date", nullable: true),
                     Approved_Date = table.Column<DateOnly>(type: "date", nullable: true),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false)
+                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
+
                 },
                 constraints: table =>
                 {

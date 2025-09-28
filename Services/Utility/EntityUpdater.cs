@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using HR_Carrer.CustomValidation;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
 namespace HR_Carrer.Services.Utility
@@ -13,6 +14,7 @@ namespace HR_Carrer.Services.Utility
         /// <param name="destination"></param>
         /// <param name="source"></param>
 
+ 
 
         public static void UpdateEntity<D,S>(D destination , S source)
         {
@@ -29,6 +31,11 @@ namespace HR_Carrer.Services.Utility
                 if (value is string str && string.IsNullOrWhiteSpace(str)) continue;
 
                 var dP = DestinationProperties.FirstOrDefault(dp=>dp.Name==property.Name);
+                if(dP.GetValue(destination) == property.GetValue(source))
+                {
+                    continue;
+                }
+
                 if (dP != null && dP.CanWrite)
                 {
                     dP.SetValue(destination, value);

@@ -8,7 +8,7 @@ namespace HR_Carrer.Data.Entity
 
         public string? Title { get; set; }
 
-        public string? Type { get; set; }
+        public RequestType? Type { get; set; }
 
         public string? Description { get; set; }
 
@@ -16,9 +16,9 @@ namespace HR_Carrer.Data.Entity
 
         public string? ImagePath { get; set; }
 
-        public DateOnly? Request_Date { get; set; }
+        public DateTime? Request_Date { get; set; }
 
-        public DateOnly? Approved_Date {get; set;}
+        public DateTime? Approved_Date {get; set;}
 
 
         //Navigation relasionship
@@ -27,6 +27,20 @@ namespace HR_Carrer.Data.Entity
 
 
 }
+
+
+    public enum RequestType
+    {
+        Leave,
+        Resignation,
+        Promotion,
+        Transfer,
+        StepComplete,
+        Other
+    }
+
+
+
     public enum RequestStatus
         {
             Approved,

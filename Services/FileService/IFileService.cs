@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.Text.RegularExpressions;
 
@@ -8,7 +9,7 @@ namespace HR_Carrer.Services.FileService
     {
         Task<string?> SaveImage(IFormFile? file);
         Task<string?> SaveCertificate(IFormFile? file);
-        string DeleteFile(string? filePath);
+        string DeleteFile(string? FileName, bool isImage = true);
 
 
 
@@ -52,19 +53,20 @@ namespace HR_Carrer.Services.FileService
 
 
 
-        public string DeleteFile(string? filePath)
+        public string DeleteFile(string? FileName, bool isImage = true)
         {
-            if (string.IsNullOrWhiteSpace(filePath))
+            if (string.IsNullOrWhiteSpace(FileName))
             {
                 return "Invalid Path";
             }
-            var FileName = Path.GetFileName(filePath);
+            var folder =isImage?_ImageDirectory:_CertificateDirectory;
+            var FullPath = Path.Combine(folder, FileName);
 
-            if (string.IsNullOrEmpty(FileName)) return "Invalid Path";
+            if (!File.Exists(FullPath)) return "File Not Found";
 
             try
             {
-                File.Delete(FileName);
+                File.Delete(FullPath);
                 return "Deleted Successfully";
 
             }
@@ -97,7 +99,6 @@ namespace HR_Carrer.Services.FileService
 
             int matchCount = existingNames is not null ? existingNames.Count(req.IsMatch!) : 0;
 
-
             string newFileName = $"{originalName}-{matchCount}{extension}";
 
             var filePath = Path.Combine(SaveDirectory, newFileName);
@@ -106,7 +107,7 @@ namespace HR_Carrer.Services.FileService
 
             await file.CopyToAsync(stream);
 
-            return filePath;
+            return newFileName;
 
         }
 

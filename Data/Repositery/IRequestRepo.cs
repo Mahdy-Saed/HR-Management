@@ -9,7 +9,12 @@ namespace HR_Carrer.Data.Repositery
 
         Task<IEnumerable<Requests>> GetAllAsync();
 
+        Task<IEnumerable<Requests>> GetAllWithQuery(int? id=null, string? name=null);
+
         Task<Requests?> GetByIdAsync(int id);
+
+        Task<Requests?> GetByIdWithEMployeeAsync(Guid id);
+
 
         Task UpdateAsync(Requests request);
 
@@ -19,7 +24,7 @@ namespace HR_Carrer.Data.Repositery
 
     }
 
-    public class RequestRepo:IRequestRepo
+    public class RequestRepo : IRequestRepo
     {
         private readonly ApplicationDbContext _context;
         public RequestRepo(ApplicationDbContext context)
@@ -57,9 +62,26 @@ namespace HR_Carrer.Data.Repositery
             return await _context.Requests.ToListAsync();
         }
 
+        public async Task<IEnumerable<Requests>> GetAllWithQuery(int? id = null, string? name = null)
+        {
+            var query =   _context.Requests.AsQueryable();
+            
+            query = id.HasValue? query.Where(r => r.Id == id) : query;
+
+            query = !string.IsNullOrEmpty(name) ? query.Where(r => r.Title == name) : query;
+
+             return await query.ToListAsync();
+
+        }
+
         public async Task<Requests?> GetByIdAsync(int id)
         {
            return await _context.Requests.FindAsync(id);
+        }
+
+        public async Task<Requests?> GetByIdWithEMployeeAsync(Guid id)
+        {
+            return await _context.Requests.FirstOrDefaultAsync(r => r.EmployeeId == id);
         }
 
         public async Task UpdateAsync(Requests request)
