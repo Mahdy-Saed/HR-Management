@@ -31,11 +31,10 @@ namespace HR_Carrer.Data.Entity
 
     public enum RequestType
     {
-        Leave,
-        Resignation,
+        
         Promotion,
-        Transfer,
         StepComplete,
+        Issue,
         Other
     }
 

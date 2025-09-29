@@ -19,8 +19,9 @@
 
         //Navigation relasionship
  
-        public Guid EmployeeId { get; set; }
-        public Employee Employee { get; set; }
+         public ICollection<Employee> Employees { get; set; }
+
+         public Steps step { get; set; }
 
         public ICollection<Skills> Skills { get; set; }=new List<Skills>(); // many to many
 

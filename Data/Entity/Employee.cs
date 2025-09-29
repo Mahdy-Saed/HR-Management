@@ -25,5 +25,6 @@ namespace HR_Carrer.Data.Entity
         public ICollection<Roadmap>? Roadmaps { get; set; }=new List<Roadmap>(); // one to many
 
 
+ 
     }
 }

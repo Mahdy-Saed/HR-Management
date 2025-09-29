@@ -46,6 +46,8 @@ namespace HR_Carrer.Data.Repositery
 
         public async Task DeleteAsync(Guid id)
         {
+
+
             var Employee = await GetByIdAsync(id);
             if (Employee != null)
             {

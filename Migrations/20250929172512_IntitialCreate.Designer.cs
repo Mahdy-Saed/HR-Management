@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HR_Carrer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250910071056_AddNewTable")]
-    partial class AddNewTable
+    [Migration("20250929172512_IntitialCreate")]
+    partial class IntitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,37 +25,37 @@ namespace HR_Carrer.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Certificate_Steps", b =>
+            modelBuilder.Entity("CertificatesSkills", b =>
                 {
-                    b.Property<int>("CertificateId")
+                    b.Property<int>("CertificatesId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("StepId")
+                    b.Property<int>("SkillsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("CertificateId", "StepId");
+                    b.HasKey("CertificatesId", "SkillsId");
 
-                    b.HasIndex("StepId");
+                    b.HasIndex("SkillsId");
 
-                    b.ToTable("Certificate_Steps");
+                    b.ToTable("CertificatesSkills");
                 });
 
-            modelBuilder.Entity("Employee_Skill", b =>
+            modelBuilder.Entity("Employee_Certificates", b =>
                 {
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("SkillId")
+                    b.Property<int>("CertificateId")
                         .HasColumnType("integer");
 
-                    b.HasKey("EmployeeId", "SkillId");
+                    b.HasKey("EmployeeId", "CertificateId");
 
-                    b.HasIndex("SkillId");
+                    b.HasIndex("CertificateId");
 
-                    b.ToTable("Employee_Skill");
+                    b.ToTable("Employee_Certificates");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Certificates", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Certificates", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -65,9 +65,6 @@ namespace HR_Carrer.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
-
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("text");
@@ -83,12 +80,10 @@ namespace HR_Carrer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
-
                     b.ToTable("Certificates");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Employee", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Employee", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -107,7 +102,7 @@ namespace HR_Carrer.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Requests", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Requests", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -115,8 +110,8 @@ namespace HR_Carrer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly?>("Approved_Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("Approved_Date")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -127,8 +122,8 @@ namespace HR_Carrer.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("text");
 
-                    b.Property<DateOnly?>("Request_Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("Request_Date")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("Status")
                         .HasColumnType("integer");
@@ -136,8 +131,8 @@ namespace HR_Carrer.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("text");
+                    b.Property<int?>("Type")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -146,7 +141,7 @@ namespace HR_Carrer.Migrations
                     b.ToTable("Requests");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Roadmap", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Roadmap", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -185,7 +180,7 @@ namespace HR_Carrer.Migrations
                     b.ToTable("Roadmaps");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Role", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -213,7 +208,7 @@ namespace HR_Carrer.Migrations
                         });
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Skills", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Skills", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -235,7 +230,7 @@ namespace HR_Carrer.Migrations
                     b.ToTable("Skills");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Steps", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Steps", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -243,20 +238,29 @@ namespace HR_Carrer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CertificateId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
                     b.Property<int>("RoadmapId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CertificateId")
+                        .IsUnique();
 
                     b.HasIndex("RoadmapId");
 
                     b.ToTable("Steps");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.User", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -277,6 +281,9 @@ namespace HR_Carrer.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
 
@@ -285,67 +292,55 @@ namespace HR_Carrer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RoleId")
-                        .IsUnique();
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Certificate_Steps", b =>
+            modelBuilder.Entity("CertificatesSkills", b =>
                 {
-                    b.HasOne("HR_Carrer.Entity.Certificates", null)
+                    b.HasOne("HR_Carrer.Data.Entity.Certificates", null)
+                        .WithMany()
+                        .HasForeignKey("CertificatesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HR_Carrer.Data.Entity.Skills", null)
+                        .WithMany()
+                        .HasForeignKey("SkillsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Employee_Certificates", b =>
+                {
+                    b.HasOne("HR_Carrer.Data.Entity.Certificates", null)
                         .WithMany()
                         .HasForeignKey("CertificateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HR_Carrer.Entity.Steps", null)
-                        .WithMany()
-                        .HasForeignKey("StepId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Employee_Skill", b =>
-                {
-                    b.HasOne("HR_Carrer.Entity.Employee", null)
+                    b.HasOne("HR_Carrer.Data.Entity.Employee", null)
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("HR_Carrer.Entity.Skills", null)
-                        .WithMany()
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Certificates", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Employee", b =>
                 {
-                    b.HasOne("HR_Carrer.Entity.Employee", "Employee")
-                        .WithMany("Certificates")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("HR_Carrer.Entity.Employee", b =>
-                {
-                    b.HasOne("HR_Carrer.Entity.User", "User")
+                    b.HasOne("HR_Carrer.Data.Entity.User", "User")
                         .WithOne("Employee")
-                        .HasForeignKey("HR_Carrer.Entity.Employee", "UserId")
+                        .HasForeignKey("HR_Carrer.Data.Entity.Employee", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Requests", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Requests", b =>
                 {
-                    b.HasOne("HR_Carrer.Entity.Employee", "Employee")
+                    b.HasOne("HR_Carrer.Data.Entity.Employee", "Employee")
                         .WithMany("Requests")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -354,9 +349,9 @@ namespace HR_Carrer.Migrations
                     b.Navigation("Employee");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Roadmap", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Roadmap", b =>
                 {
-                    b.HasOne("HR_Carrer.Entity.Employee", "Employee")
+                    b.HasOne("HR_Carrer.Data.Entity.Employee", "Employee")
                         .WithMany("Roadmaps")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -365,51 +360,62 @@ namespace HR_Carrer.Migrations
                     b.Navigation("Employee");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Steps", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Steps", b =>
                 {
-                    b.HasOne("HR_Carrer.Entity.Roadmap", "Roadmap")
+                    b.HasOne("HR_Carrer.Data.Entity.Certificates", "Certificate")
+                        .WithOne("step")
+                        .HasForeignKey("HR_Carrer.Data.Entity.Steps", "CertificateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HR_Carrer.Data.Entity.Roadmap", "Roadmap")
                         .WithMany("Steps")
                         .HasForeignKey("RoadmapId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Certificate");
+
                     b.Navigation("Roadmap");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.User", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.User", b =>
                 {
-                    b.HasOne("HR_Carrer.Entity.Role", "Role")
-                        .WithOne("User")
-                        .HasForeignKey("HR_Carrer.Entity.User", "RoleId")
+                    b.HasOne("HR_Carrer.Data.Entity.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Employee", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Certificates", b =>
                 {
-                    b.Navigation("Certificates");
+                    b.Navigation("step")
+                        .IsRequired();
+                });
 
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Employee", b =>
+                {
                     b.Navigation("Requests");
 
                     b.Navigation("Roadmaps");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Roadmap", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Roadmap", b =>
                 {
                     b.Navigation("Steps");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.Role", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Role", b =>
                 {
-                    b.Navigation("User");
+                    b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("HR_Carrer.Entity.User", b =>
+            modelBuilder.Entity("HR_Carrer.Data.Entity.User", b =>
                 {
-                    b.Navigation("Employee")
-                        .IsRequired();
+                    b.Navigation("Employee");
                 });
 #pragma warning restore 612, 618
         }

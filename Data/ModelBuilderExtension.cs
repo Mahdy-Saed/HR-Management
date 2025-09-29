@@ -1,6 +1,8 @@
 ﻿using HR_Carrer.Data.Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ObjectiveC;
 using System.Security.Cryptography.X509Certificates;
 
 namespace HR_Carrer.Data
@@ -26,13 +28,18 @@ namespace HR_Carrer.Data
 
 
                 builder.HasKey(e => e.UserId);
-                
+
 
                 //Configure many-to-many relationship between Employee and Skills
 
-                //Configure one-to-many relationship between Employee and Certificates
-                builder.HasMany(e => e.Certificates).WithOne(c => c.Employee).HasForeignKey(c => c.EmployeeId).OnDelete(DeleteBehavior.Cascade);
 
+                //Configure many-to-many relationship between Employee and Certificates
+                builder.HasMany(e => e.Certificates).WithMany(c => c.Employees)
+                .UsingEntity<Dictionary<string,object>>("Employee_Certificates",
+                j=>j.HasOne<Certificates>().WithMany().HasForeignKey("CertificateId").OnDelete(DeleteBehavior.Cascade),
+                j=>j.HasOne<Employee>().WithMany().HasForeignKey("EmployeeId").OnDelete(DeleteBehavior.Cascade),
+                j=>j.HasKey("EmployeeId","CertificateId")
+                );
 
                 //Configure one-to-many relationship between Employee and Requests
                 builder.HasMany(e => e.Requests).WithOne(r => r.Employee).HasForeignKey(r => r.EmployeeId).OnDelete(DeleteBehavior.Cascade);
@@ -50,11 +57,16 @@ namespace HR_Carrer.Data
             });
 
 
+ 
 
-            //configure many-to-many relationship between Certificates and Steps
-        
-            
-          
+            //configure one-to-many relationship between Certificates and Steps
+            modleBuilder.Entity<Steps>(builder =>
+            {
+                builder.HasOne(c => c.Certificate).WithOne(c=>c.step).HasForeignKey<Steps>(s => s.CertificateId);
+            }
+            );
+
+
         }
 
 

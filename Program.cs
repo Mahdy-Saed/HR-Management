@@ -38,7 +38,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IRoadmapService, EmployeeService>();
 builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(Program));
 

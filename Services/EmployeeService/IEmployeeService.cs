@@ -11,7 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace HR_Carrer.Services.EmployeeService
 {
-    public interface IEmployeeService
+    public interface IRoadmapService
     {
         Task<ServiceResponce<EmployeeCreateResDto>> CreateEmployee(Guid id,EmployeeRequestDto userRequestDto);
 
@@ -34,7 +34,7 @@ namespace HR_Carrer.Services.EmployeeService
 
     }
 
-    public class EmployeeService : IEmployeeService
+    public class EmployeeService : IRoadmapService
     {
 
         private readonly IEmployeeRepo _employeeRepo;

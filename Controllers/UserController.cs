@@ -23,7 +23,7 @@ namespace HR_Carrer.Controllers
         }
         //................................................(Create-User).....................................................
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateUser([FromBody] UserRequestDto userRequestDto)
         {

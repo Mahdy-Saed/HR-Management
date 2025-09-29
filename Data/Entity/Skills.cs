@@ -13,10 +13,9 @@
 
         // Navigation Relationship
         public ICollection<Certificates> Certificates { get; set; } = new List<Certificates>(); // many to many
+        
 
     }
-
-
     public enum SkillLevel
     {
         Beginner,

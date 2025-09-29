@@ -10,8 +10,8 @@ namespace HR_Carrer.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly IEmployeeService _employeeService;
-        public EmployeeController(IEmployeeService employeeService)
+        private readonly IRoadmapService _employeeService;
+        public EmployeeController(IRoadmapService employeeService)
         {
             _employeeService = employeeService;
         }

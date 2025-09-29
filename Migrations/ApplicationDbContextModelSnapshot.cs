@@ -37,6 +37,21 @@ namespace HR_Carrer.Migrations
                     b.ToTable("CertificatesSkills");
                 });
 
+            modelBuilder.Entity("Employee_Certificates", b =>
+                {
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CertificateId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("EmployeeId", "CertificateId");
+
+                    b.HasIndex("CertificateId");
+
+                    b.ToTable("Employee_Certificates");
+                });
+
             modelBuilder.Entity("HR_Carrer.Data.Entity.Certificates", b =>
                 {
                     b.Property<int>("Id")
@@ -47,9 +62,6 @@ namespace HR_Carrer.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
-
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("text");
@@ -64,8 +76,6 @@ namespace HR_Carrer.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
 
                     b.ToTable("Certificates");
                 });
@@ -225,13 +235,22 @@ namespace HR_Carrer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CertificateId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
                     b.Property<int>("RoadmapId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CertificateId")
+                        .IsUnique();
 
                     b.HasIndex("RoadmapId");
 
@@ -290,15 +309,19 @@ namespace HR_Carrer.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("HR_Carrer.Data.Entity.Certificates", b =>
+            modelBuilder.Entity("Employee_Certificates", b =>
                 {
-                    b.HasOne("HR_Carrer.Data.Entity.Employee", "Employee")
-                        .WithMany("Certificates")
-                        .HasForeignKey("EmployeeId")
+                    b.HasOne("HR_Carrer.Data.Entity.Certificates", null)
+                        .WithMany()
+                        .HasForeignKey("CertificateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Employee");
+                    b.HasOne("HR_Carrer.Data.Entity.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HR_Carrer.Data.Entity.Employee", b =>
@@ -336,11 +359,19 @@ namespace HR_Carrer.Migrations
 
             modelBuilder.Entity("HR_Carrer.Data.Entity.Steps", b =>
                 {
+                    b.HasOne("HR_Carrer.Data.Entity.Certificates", "Certificate")
+                        .WithOne("step")
+                        .HasForeignKey("HR_Carrer.Data.Entity.Steps", "CertificateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HR_Carrer.Data.Entity.Roadmap", "Roadmap")
                         .WithMany("Steps")
                         .HasForeignKey("RoadmapId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Certificate");
 
                     b.Navigation("Roadmap");
                 });
@@ -356,10 +387,14 @@ namespace HR_Carrer.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("HR_Carrer.Data.Entity.Certificates", b =>
+                {
+                    b.Navigation("step")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("HR_Carrer.Data.Entity.Employee", b =>
                 {
-                    b.Navigation("Certificates");
-
                     b.Navigation("Requests");
 
                     b.Navigation("Roadmaps");

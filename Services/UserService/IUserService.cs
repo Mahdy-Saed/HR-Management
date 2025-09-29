@@ -59,6 +59,7 @@ namespace HR_Carrer.Services.UserService
             if (existingUser is not null)
                 return ServiceResponce<UserResponceDto>.Fail("User already exists", 409);
 
+
             var user = _mapper.Map<User>(userRequestDto);
             user.PasswordHash = _passwordHasher.Hash(userRequestDto.Password!);
             var role = await _userRepo.Getrole(2); // get the role of User.

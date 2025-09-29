@@ -15,6 +15,8 @@ namespace HR_Carrer.Data.Repositery
 
         Task<Requests?> GetByIdWithEMployeeAsync(Guid id);
 
+        Task<Requests?> promotionRequest(Guid id);
+
 
         Task UpdateAsync(Requests request);
 
@@ -56,6 +58,13 @@ namespace HR_Carrer.Data.Repositery
             }
 
         }
+        public async Task<Requests?> promotionRequest(Guid id)
+        {
+           return  await   _context.Requests.Where(r=>r.EmployeeId==id && r.Type==RequestType.Promotion)
+                .OrderByDescending(r=>r.Request_Date).FirstOrDefaultAsync();
+        }
+
+
 
         public async Task<IEnumerable<Requests>> GetAllAsync()
         {
