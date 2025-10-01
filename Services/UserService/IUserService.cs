@@ -135,7 +135,7 @@ namespace HR_Carrer.Services.UserService
                 return ServiceResponce<PagedResultDto<UserResponceDto>>.Fail("User not found", 404);
 
             if(pageNumber <= 0) pageNumber = 1;
-
+            if(pageSize <= 0) pageSize = 10;
             var totalCount = query.Count();
             var totalPages =(int) Math.Ceiling(totalCount / (double)pageSize);
             var pagedUser = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);

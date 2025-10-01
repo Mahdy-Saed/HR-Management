@@ -3,6 +3,7 @@ using HR_Carrer.Authntication;
 using HR_Carrer.Data;
 using HR_Carrer.Data.Repositery;
 using HR_Carrer.Services.AuthService;
+using HR_Carrer.Services.CertificateService;
 using HR_Carrer.Services.EmployeeService;
 using HR_Carrer.Services.FileService;
 using HR_Carrer.Services.RequestService;
@@ -30,15 +31,21 @@ builder.Services.AddControllersWithViews() // or AddControllers() in a Web API
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("jwtsettings"));
 builder.Services.AddScoped<IRequestRepo, RequestRepo>();
-builder.Services.AddScoped<IRequestService, ReqeustService>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
+builder.Services.AddScoped<ICertificateRepo, CertificateRepo>();
+builder.Services.AddScoped<IRoadmapRepo, RoadmapRepo>();
+builder.Services.AddScoped<IStepsRepo, StepsRepo>();
+builder.Services.AddScoped<ISkillRepo, SkillRepo>();
+//------------------- Dependency Injection ------------------ -
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoadmapService, EmployeeService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRequestService, ReqeustService>();
+builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<ITokenGenerater, TokenGenerater>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IEmployeeRepo, EmployeeRepo>();
-builder.Services.AddScoped<IRoadmapService, EmployeeService>();
 builder.Services.AddCors();
 builder.Services.AddAutoMapper(typeof(Program));
 

@@ -74,7 +74,6 @@ namespace HR_Carrer.Controllers
 
 
         [HttpDelete]
-        [Route("id")]
         public async Task<IActionResult> DeleteEmployee()
         {
             if (!this.TryGetUserId(out Guid userId))

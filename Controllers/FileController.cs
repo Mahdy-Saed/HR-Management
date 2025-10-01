@@ -1,4 +1,5 @@
-﻿using HR_Carrer.Services.RequestService;
+﻿using HR_Carrer.Services.CertificateService;
+using HR_Carrer.Services.RequestService;
 using HR_Carrer.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,10 +15,12 @@ namespace HR_Carrer.Controllers
     {
         private readonly IUserService _userService;
         private readonly IRequestService _requestService;
-        public FileController( IRequestService requestService,IUserService userService)
+        private readonly ICertificateService _certificateService;
+        public FileController(IRequestService requestService, IUserService userService, ICertificateService certificateService)
         {
-             _requestService = requestService;
-            _userService= userService;
+            _requestService = requestService;
+            _userService = userService;
+            _certificateService = certificateService;
         }
 
         //................................................(Upload-profile-Image).....................................................
@@ -107,6 +110,35 @@ namespace HR_Carrer.Controllers
 
                 return StatusCode(result.StatusCode, result);
 
+        }
+
+        //................................................(Upload-Certificate-Image).....................................................
+
+        [HttpPost("Upload-Certificate-Image")]
+        public async Task<IActionResult> UploadCertificateImage(int id, IFormFile CertificateImage)
+        {
+            if(id == 0 || id < 0)
+            {
+                return BadRequest("Id must be not null or zero");
+            }
+            if (CertificateImage == null || CertificateImage.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+            var responce = await _certificateService.UploadCertificateImage(id, CertificateImage);
+            return StatusCode(responce.StatusCode, responce);
+
+
+        }
+
+        //...................................................(Delete-Certificate-Image)......................................................
+
+        [HttpDelete("Delete-Certificate-Image")]
+        public async Task<IActionResult> DeleteCertificateImage(int id)
+        {
+            if (id == 0 || id < 0) return BadRequest("Id must be not null or zero");
+            var result = await _certificateService.DeleteCertificateImage(id);
+            return StatusCode(result.StatusCode, result);
         }
 
     }
