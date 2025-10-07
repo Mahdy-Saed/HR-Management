@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HR_Carrer.Services.UserService
 {
-    public interface IUserService
+    public interface IUserservice
     {
 
         Task<ServiceResponce<PagedResultDto<UserResponceDto>>> GetAllUsers(Guid? id = null, string? name = null,
@@ -32,7 +32,7 @@ namespace HR_Carrer.Services.UserService
         Task<ServiceResponce<string>> DeleteAll();
 
     }
-    public class UserService : IUserService
+    public class UserService : IUserservice
     {
 
         private readonly IUserRepo _userRepo;

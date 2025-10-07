@@ -14,35 +14,62 @@ namespace HR_Carrer.Services.Utility
         /// <param name="destination"></param>
         /// <param name="source"></param>
 
- 
 
-        public static void UpdateEntity<D,S>(D destination , S source)
+
+        public static void UpdateEntity<D, S>(D destination, S source)
         {
-            var SourceProperties = typeof(S).GetProperties(BindingFlags.Public | BindingFlags.Instance);  // get the Properties_Information of the source
-            var DestinationProperties = typeof(D).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var property in SourceProperties)
+            var sourceProperties = typeof(S).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var destinationProperties = typeof(D).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var property in sourceProperties)
             {
-
                 var value = property.GetValue(source);
-
                 if (value == null) continue;
 
-#pragma warning disable S3626 // Jump statements should not be redundant
-                if (value is string str && string.IsNullOrWhiteSpace(str)) continue;
+                // تجاهل الفراغات أو "string" الوهمية
+                if (value is string str && (string.IsNullOrWhiteSpace(str) || str.Trim().ToLower() == "string"))
+                    continue;
 
-                var dP = DestinationProperties.FirstOrDefault(dp=>dp.Name==property.Name);
-                if(dP.GetValue(destination) == property.GetValue(source))
+                if(value is int && (int)value == 0) { continue; }
+
+                var dP = destinationProperties.FirstOrDefault(dp => dp.Name == property.Name);
+                if (dP == null || !dP.CanWrite) continue;
+
+                var destType = dP.PropertyType;
+                var sourceType = property.PropertyType;
+
+                if (destType == sourceType)
                 {
+                    dP.SetValue(destination, value);
                     continue;
                 }
 
-                if (dP != null && dP.CanWrite)
+                if (destType.IsEnum && value is string stringValue)
                 {
-                    dP.SetValue(destination, value);
+                    var enumValue = Enum.Parse(destType, stringValue, true);
+                    dP.SetValue(destination, enumValue);
+                    continue;
+                }
+
+                if (sourceType.IsEnum && destType == typeof(string))
+                {
+                    dP.SetValue(destination, value.ToString());
+                    continue;
+                }
+                
+
+                try
+                {
+                    var convertedValue = Convert.ChangeType(value, destType);
+                    dP.SetValue(destination, convertedValue);
+                }
+                catch
+                {
+                    // تجاهل لو ما نقدر نحول
                 }
             }
-
         }
+
 
 
     }

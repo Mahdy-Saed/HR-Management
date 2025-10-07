@@ -13,10 +13,10 @@ namespace HR_Carrer.Controllers
     [ApiController]
     public class FileController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IUserservice _userService;
         private readonly IRequestService _requestService;
         private readonly ICertificateService _certificateService;
-        public FileController(IRequestService requestService, IUserService userService, ICertificateService certificateService)
+        public FileController(IRequestService requestService, IUserservice userService, ICertificateService certificateService)
         {
             _requestService = requestService;
             _userService = userService;

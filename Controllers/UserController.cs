@@ -16,8 +16,8 @@ namespace HR_Carrer.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
-         public UserController(IUserService userService)
+        private readonly IUserservice _userService;
+         public UserController(IUserservice  userService)
         {
             _userService = userService;
         }

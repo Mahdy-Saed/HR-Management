@@ -10,6 +10,12 @@ namespace HR_Carrer.Mapper
         {
             CreateMap<Skills, SkillResponceDto>()
                 .ForMember(des => des.Level, opt => opt.MapFrom(src => src.Level.ToString()));
+
+
+            CreateMap<SkillCreateDto, Skills>();
+
+            CreateMap<SkillUpdateDto, Skills>();
+
         }
 
     }
