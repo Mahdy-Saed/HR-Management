@@ -2,7 +2,7 @@
 
 namespace HR_Carrer.Dto.CertificateDtos
 {
-    public class CertificateSkillsDto
+    public class CertificateSkillsResDto
     {
         public CertificateResponceDto? Certificate { get; set; }
 

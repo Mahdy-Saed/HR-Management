@@ -32,6 +32,25 @@ namespace HR_Carrer.Controllers
 
         }
 
+        [HttpPost("{CertificateId}/AddSkillsToCertificate")]
+
+        public async Task<IActionResult> AddSkillsToCertificate([FromRoute] int CertificateId,[FromBody] CertificateSkillsReqDto certificateSkillsReq)
+        {
+            if (CertificateId <0 || certificateSkillsReq is null)
+            {
+                return BadRequest("INvalid Data: Must Enter Information");
+            }
+               
+
+            var responce = await _certificateService.AddSkillsToCertificate(CertificateId,certificateSkillsReq);
+
+            return StatusCode(responce.StatusCode, responce);
+
+
+        }
+
+
+
         [HttpGet]
         public async Task<IActionResult> GetAllCertificates([FromQuery]int?id=null , [FromQuery] string? name=null,
                                                             [FromQuery] int pageNumber = 1,    [FromQuery] int pageSize = 10)

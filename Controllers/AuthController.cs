@@ -44,7 +44,7 @@ namespace HR_Carrer.Controllers
 
 
         [HttpPost]
-        [Route("refresh-token")]
+        [Route("getNewToken")]
         public async Task<IActionResult> Refresh([FromBody] AuthRefeshDto auth)
         {
             if(string.IsNullOrEmpty(auth.RefreshToken))  return BadRequest("Refresh token is required");

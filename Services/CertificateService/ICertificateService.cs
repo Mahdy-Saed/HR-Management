@@ -9,6 +9,7 @@ using HR_Carrer.Services.FileService;
 using HR_Carrer.Services.Utility;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Ocsp;
 using System.Security.Cryptography.X509Certificates;
 
 namespace HR_Carrer.Services.CertificateService
@@ -19,10 +20,13 @@ namespace HR_Carrer.Services.CertificateService
        
         Task<ServiceResponce<CertificateResponceDto>> GetCertificate(int? id);
 
+        Task<ServiceResponce<CertificateSkillsResDto>> AddSkillsToCertificate(int id , CertificateSkillsReqDto certificateSkillsReq);
+
+
         Task<ServiceResponce<PagedResultDto<CertificateResponceDto>>> GetAllCertificates(int? id = null, string? name = null,
                                                                  int pageNumber = 1, int pageSize = 10);
 
-        Task<ServiceResponce<CertificateSkillsDto>> GetCertificateWithSkills(int id);
+        Task<ServiceResponce<CertificateSkillsResDto>> GetCertificateWithSkills(int id);
 
 
         Task<ServiceResponce<CertificateResponceDto>> UpdateCertificate(int id,[FromQuery]CertificateUpdateDto certificateUpdateDto);
@@ -41,14 +45,16 @@ namespace HR_Carrer.Services.CertificateService
     public class CertificateService : ICertificateService
     {
         private readonly ICertificateRepo _certificateRepo;
+        private readonly ISkillRepo _skillRepo;
         private readonly IFileService _fileService;
         private readonly IMapper _mapper;
 
-        public CertificateService(ICertificateRepo certificateRepo, IMapper mapper, IFileService fileService)
+        public CertificateService(ICertificateRepo certificateRepo, IMapper mapper, IFileService fileService, ISkillRepo skillRepo)
         {
             _certificateRepo = certificateRepo;
             _mapper = mapper;
             _fileService = fileService;
+            _skillRepo = skillRepo;
         }
 
 
@@ -245,28 +251,81 @@ namespace HR_Carrer.Services.CertificateService
     }
 
         //.............................................(Get Certificate With Skills).......................................................
-        public async Task<ServiceResponce<CertificateSkillsDto>> GetCertificateWithSkills(int id)
+        public async Task<ServiceResponce<CertificateSkillsResDto>> GetCertificateWithSkills(int id)
         {
            var CertificateWithSkills = await  _certificateRepo.GetCertificateWithSkill(id);
             if(CertificateWithSkills is null)
             {
-                return       ServiceResponce<CertificateSkillsDto>.Fail("Certificate not found", 404);
+                return       ServiceResponce<CertificateSkillsResDto>.Fail("Certificate not found", 404);
             }
             var CertificateDto = _mapper.Map<CertificateResponceDto>(CertificateWithSkills);
             var skillsDto = _mapper.Map<List<SkillResponceDto>>(CertificateWithSkills.Skills);
 
-            var responce = new CertificateSkillsDto
+            var responce = new CertificateSkillsResDto
             {
                 Certificate = CertificateDto,
                 CoverdSkills = skillsDto
             };
 
-            return (ServiceResponce<CertificateSkillsDto>.success(responce, "Certificate with skills retrieved successfully", 200));
+            return (ServiceResponce<CertificateSkillsResDto>.success(responce, "Certificate with skills retrieved successfully", 200));
 
 
 
 
         }
+
+        //.............................................(Add Skills To Certificate).......................................................
+
+        public async Task<ServiceResponce<CertificateSkillsResDto>> AddSkillsToCertificate(int id, CertificateSkillsReqDto certificateSkillsReq)
+        {
+
+            if (id <= 0) return ServiceResponce<CertificateSkillsResDto>.Fail("Invalid Certificate Id", 400);
+
+            var Certificate = await _certificateRepo.GetByIdAsync(id);
+            if (Certificate is null) return ServiceResponce<CertificateSkillsResDto>.Fail("Certificate not found", 404);
+
+            var CertificateWithSKill = await _certificateRepo.GetCertificateWithSkill(id);
+
+
+            foreach (var skillId in certificateSkillsReq.ExsisteExistingSkillIds)
+            {
+                var exstingSkill = await _skillRepo.GetByIdAsync(skillId);
+                if(exstingSkill is null)
+                {
+                    return ServiceResponce<CertificateSkillsResDto>.Fail($"The skills with Id {skillId} does not exsist", 400);
+
+                }
+                if (CertificateWithSKill.Skills.Contains(exstingSkill))
+                {
+                    return ServiceResponce<CertificateSkillsResDto>.Fail($"The Skill With ID : {skillId} already exsist",400);
+                }
+                Certificate.Skills.Add(exstingSkill);
+            }
+
+            
+
+            await _certificateRepo.UpdateAsync(Certificate);
+
+
+            var CertificateDto= _mapper.Map<CertificateResponceDto>(CertificateWithSKill);
+
+            var skillsDto = _mapper.Map<List<SkillResponceDto>>(CertificateWithSKill.Skills);
+
+            var Responce = new CertificateSkillsResDto()
+            {
+                Certificate = CertificateDto,
+                CoverdSkills = skillsDto
+            };
+
+
+            return ServiceResponce<CertificateSkillsResDto>.success(Responce,"the added its sucessfuly", 200);
+
+
+
+        }
+        
+
+
     }
 
 
