@@ -62,7 +62,7 @@ namespace HR_Carrer.Controllers
         }
 
 
-        [HttpGet("{id}/Skills")]
+        [HttpGet("{id}/CoveredSkills")]
         public async Task<IActionResult> GetCertificateWithSkills([FromRoute]int id)
         {
             if ( id <= 0)

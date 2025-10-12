@@ -12,6 +12,10 @@ namespace HR_Carrer.Data.Repositery
 
         Task<Roadmap?> GetByIdAsync(int id);
 
+        Task<Roadmap?> GetByEmployeeId(Guid id, string RoamapTitle);
+
+
+        Task<IEnumerable<Roadmap>> GetAllAsyncWithQuery(int? id=null, string? title=null);
         Task UpdateAsync(Roadmap certificate);
 
         Task DeleteAsync(int id);
@@ -21,7 +25,7 @@ namespace HR_Carrer.Data.Repositery
 
     }
 
-    public class RoadmapRepo:IRoadmapRepo
+    public class RoadmapRepo : IRoadmapRepo
     {
         private readonly ApplicationDbContext _context;
         public RoadmapRepo(ApplicationDbContext context)
@@ -31,7 +35,7 @@ namespace HR_Carrer.Data.Repositery
 
         public async Task AddAsync(Roadmap roadmap)
         {
-           
+
             await _context.Roadmaps.AddAsync(roadmap);
             await _context.SaveChangesAsync();
 
@@ -39,13 +43,13 @@ namespace HR_Carrer.Data.Repositery
 
         public async Task DeleteAllAsync()
         {
-             _context.Roadmaps.RemoveRange(_context.Roadmaps);
+            _context.Roadmaps.RemoveRange(_context.Roadmaps);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var roadmap =  await  GetByIdAsync(id);  
+            var roadmap = await GetByIdAsync(id);
 
             if (roadmap is not null)
             {
@@ -59,6 +63,23 @@ namespace HR_Carrer.Data.Repositery
             return await _context.Roadmaps.ToListAsync();
         }
 
+        public async Task<IEnumerable<Roadmap>> GetAllAsyncWithQuery(int? id = null, string? title = null)
+        {
+            var query = _context.Roadmaps.Include(u => u.Steps).AsQueryable();
+
+            query = id.HasValue ? query.Where(u => u.Id == id.Value) : query;
+
+            query = !string.IsNullOrWhiteSpace(title) ? query.Where(u => u.Title == title) : query;
+
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<Roadmap?> GetByEmployeeId(Guid id,string RoamapTitle)
+        {
+            return await _context.Roadmaps.FirstOrDefaultAsync(s => s.EmployeeId == id &&  s.Title==RoamapTitle);
+        }
+
         public async Task<Roadmap?> GetByIdAsync(int id)
         {
             return await _context.Roadmaps.FindAsync(id);
@@ -70,6 +91,4 @@ namespace HR_Carrer.Data.Repositery
             await _context.SaveChangesAsync();
         }
     }
-
-
 }

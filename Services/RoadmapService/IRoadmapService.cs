@@ -17,22 +17,13 @@ namespace HR_Carrer.Services.RoadmapService
     {
         Task<ServiceResponce<RoadmapResponceDto>> CreateRoadmap(Guid id, RoadmapRequestDto roadmapRequestDto);
 
-        Task<ServiceResponce<StepsResponceDto>> CreateSteps (int roadMapId , StepsRequestDto stepsRequestDto );
+        Task<ServiceResponce<RoadmapResponceDto>> GetRoadMap(int id);
 
-        //Task<ServiceResponce<EmployeeResponceDto>> GetInoformation(Guid id);
+        Task<ServiceResponce<RoadmapResponceDto>> UpdateRoadmap(int id,RoadmapUpdateDto roadmapUpdateDto);
 
-        //Task<ServiceResponce<string>> ChangePassword(Guid id, ChangePasswordDto changePasswordDto);
-        //Task<ServiceResponce<string>> DeleteEmployee(Guid id);
-
-        //Task<ServiceResponce<string>> UploadImage(Guid id, IFormFile Image);
-
-        //Task<ServiceResponce<string>> DeleteImage(Guid id);
-
-        //Task<ServiceResponce<string>> DeleteUser(Guid id);
-
-
-
-
+        Task<ServiceResponce<PagedResultDto<RoadmapResponceDto>>> GetAllRoadMaps(int? id = null, string? title = null,
+                                                                                     int pageNumber = 1, int pageSize = 10);
+        Task<ServiceResponce<string>> DeleteRoadmap(int id);
 
     }
 
@@ -66,6 +57,13 @@ namespace HR_Carrer.Services.RoadmapService
                 return ServiceResponce<RoadmapResponceDto>.Fail("Must enter information", 400);
             
             }
+
+            var exsistRoadMap = await _roadmapRepo.GetByEmployeeId(id,roadmapRequestDto.Title);
+
+            if(exsistRoadMap is not null)
+            {
+                return ServiceResponce<RoadmapResponceDto>.Fail("THe RoadMap for the Employee is ALready exsit", 409);
+            }
             
               var requestOfEmployee = await _requestRepo.promotionRequest(id);
 
@@ -74,6 +72,7 @@ namespace HR_Carrer.Services.RoadmapService
                 return ServiceResponce<RoadmapResponceDto>.Fail("The employee Did Not send a request for promotion.", 400);
             
             }
+
             if (requestOfEmployee.Status != RequestStatus.Approved)
             {
                 return ServiceResponce<RoadmapResponceDto>.Fail("The employee's promotion request has not been accepted yet.", 400);
@@ -81,106 +80,98 @@ namespace HR_Carrer.Services.RoadmapService
 
             var Roadmap = _mapper.Map<Roadmap>(roadmapRequestDto); 
             Roadmap.EmployeeId = id;
-
             await _roadmapRepo.AddAsync(Roadmap);
-
             var responce = _mapper.Map<RoadmapResponceDto>(Roadmap);
             return ServiceResponce<RoadmapResponceDto>.success(responce, "Roadmap Created Successfully", 201);
         }
 
+ //................................................(Get-information).....................................................
 
-
-        //................................................(Create-Steps).....................................................
-
-        public async Task<ServiceResponce<StepsResponceDto>> CreateSteps(int roadMapId, StepsRequestDto stepsRequestDto)
+        public async Task<ServiceResponce<RoadmapResponceDto>> GetRoadMap(int id)
         {
-            var roadmap = await _roadmapRepo.GetByIdAsync(roadMapId);
-            if (roadmap is null) return ServiceResponce<StepsResponceDto>.Fail("Roadmap not found or must create RoadMap", 404);
-            if (stepsRequestDto is null)
-            {
-                return ServiceResponce<StepsResponceDto>.Fail("Must enter information", 400);
-            }
-            var step = _mapper.Map<Steps>(stepsRequestDto);
+            if(id<0) throw new ArgumentOutOfRangeException("id");
 
-            // link the step with the roadmap and the certificate
-            step.RoadmapId = roadMapId;
-            step.CertificateId = stepsRequestDto.CertificatedId; 
+            var RoadMap = await _roadmapRepo.GetByIdAsync(id);
 
-            await _stepsRepo.AddAsync(step);
-            var responce = _mapper.Map<StepsResponceDto>(roadmap.Steps);
-            return ServiceResponce<StepsResponceDto>.success(responce, "Step Created Successfully", 201);
+            if(RoadMap is null) { return ServiceResponce<RoadmapResponceDto>.Fail("Roadmap Doesnot Exsist ", 400); }
+
+
+            var RoadMapDto =_mapper.Map<RoadmapResponceDto>(RoadMap);
+
+            return   ServiceResponce<RoadmapResponceDto>.success(RoadMapDto,"Roadmap returived Successfully", 200);
         }
 
 
-        //   //................................................(Get-information).....................................................
+        //................................................(Get-All-information).....................................................
 
+        public async Task<ServiceResponce<PagedResultDto<RoadmapResponceDto>>> GetAllRoadMaps(int? id = null, string? title = null, int pageNumber = 1, int pageSize = 10)
+        {
+            var query = await _roadmapRepo.GetAllAsyncWithQuery(id, title);
 
-        //public async   Task<ServiceResponce<EmployeeResponceDto>> GetInoformation(Guid id)
-        //   {
-        //       var user = await _userRepo.GetByIdAsync(id);  // return with employee data
+            if (query is null || !query.Any())
+                return ServiceResponce<PagedResultDto<RoadmapResponceDto>>.Fail("roadmaps  not found", 404);
 
-        //       if (user is null) return ServiceResponce<EmployeeResponceDto>.Fail("User not found", 404);
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageSize <= 0) pageSize = 10;
+            var totalCount = query.Count();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            var pagedRoadmaps = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
-        //       var responce = _mapper.Map<EmployeeResponceDto>(user);
+            var RoadmapsDto = _mapper.Map<List<RoadmapResponceDto>>(pagedRoadmaps.ToList());
 
+            var responce = new PagedResultDto<RoadmapResponceDto>
+            {
+                Items = RoadmapsDto,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages
+            };
 
-        //       return ServiceResponce<EmployeeResponceDto>.success(responce, "information retrived Successfully", 200);
-        //   }
-
-        //   //................................................(Delete-Employee).....................................................
-
-
-        //   // here i will not use the cascading delete because i want to make sure that the user is deleted first then the employee
-        //   public async Task<ServiceResponce<string>> DeleteEmployee(Guid id)
-        //   {
-        //       var employee = await _employeeRepo.GetByIdAsync(id);
-        //       if (employee is null) return ServiceResponce<string>.Fail("Employee not found", 404);
-
-        //       var user = employee.User;
-        //       if (user is null) return ServiceResponce<string>.Fail("User not found", 404);
-
-        //       await _userRepo.DeleteAsync(user.Id);
-
-        //       await _employeeRepo.DeleteAsync(id);
-
-        //       return ServiceResponce<string>.success(null, "Employee Deleted Successfully", 200);
-        //   }
-
-        //       //................................................(Delete-Employee).....................................................
-
-
-        //  public async Task<ServiceResponce<string>> ChangePassword(Guid id, ChangePasswordDto changePasswordDto)
-        //   {
-        //       var user = await _userRepo.GetByIdAsync(id);
-
-        //       if (user is null) return ServiceResponce<string>.Fail("User not found", 404);
-
-        //       if (changePasswordDto is null) return ServiceResponce<string>.Fail("Must enter information", 400);
-
-        //       if (!_passwordHasher.verify(changePasswordDto.OldPassword!, user.PasswordHash!))
-        //       {
-        //           return ServiceResponce<string>.Fail("Old password is incorrect", 400);
-        //       }
-
-        //       if(changePasswordDto.NewPassword != changePasswordDto.ConfirmPassword)
-        //       {
-        //           return ServiceResponce<string>.Fail("New password and confirm new password do not match", 400);
-        //       }
-
-        //       user.PasswordHash = _passwordHasher.Hash(changePasswordDto.NewPassword!);
-
-        //       await _userRepo.UpdateAsync(user);
-
-        //       return ServiceResponce<string>.success(null, "Password Changed Successfully", 200);
+            return ServiceResponce<PagedResultDto<RoadmapResponceDto>>.success(responce, "Roadmap retrived successfuly", 200);
 
 
 
-        //   }
+
+        }
+
+        //................................................(Delete-Roadmap).....................................................
+
+        public async Task<ServiceResponce<string>> DeleteRoadmap(int id)
+        {
+            if (id <= 0)  throw new ArgumentException("id");
+
+            var exsiteRoadmap = await _roadmapRepo.GetByIdAsync(id);
+            if (exsiteRoadmap == null) return ServiceResponce<string>.Fail("Roamap Does not exsist", 404);
+
+             await _roadmapRepo.DeleteAsync(id);
+
+            return ServiceResponce<string>.success("Deleted Sucessfully", "", 200);
 
 
+        }
 
-        //   }
 
+        //..............................................(Update-Roadmap)........................................................
+
+
+        public async Task<ServiceResponce<RoadmapResponceDto>> UpdateRoadmap(int id, RoadmapUpdateDto roadmapUpdateDto )
+        {
+            if(id<0 || roadmapUpdateDto is null) throw new ArgumentException("Invalid arguments: ID must be positive and the update DTO cannot be null.", nameof(roadmapUpdateDto));
+
+            var RoadMap = await _roadmapRepo.GetByIdAsync(id);
+            if (RoadMap is null) return  ServiceResponce<RoadmapResponceDto>.Fail("The RoadMap does not exsist", 404);
+
+            if(roadmapUpdateDto is null) return ServiceResponce<RoadmapResponceDto>.Fail("Must Enter Information", 400);
+
+            EntityUpdater.UpdateEntity(RoadMap, roadmapUpdateDto);
+
+            await _roadmapRepo.UpdateAsync(RoadMap);
+
+            var responce = _mapper.Map<RoadmapResponceDto>(RoadMap);
+
+            return ServiceResponce<RoadmapResponceDto>.success(responce, "Updated Sucessfully ", 200);
+        }
     }
 }
 

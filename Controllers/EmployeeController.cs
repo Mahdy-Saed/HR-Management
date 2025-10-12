@@ -10,14 +10,14 @@ namespace HR_Carrer.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly IRoadmapService _employeeService;
-        public EmployeeController(IRoadmapService employeeService)
+        private readonly IEmployeeService _employeeService;
+        public EmployeeController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
         }
 
         /// <remarks> Note:Need the privilage of "Amdin"</remarks>
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("CreateEmployee/{id}")]
         public async Task<IActionResult> CreateEmployee([FromRoute] Guid id, [FromBody] EmployeeRequestDto employeeRequestDto)
         {

@@ -12,6 +12,9 @@ namespace HR_Carrer.Data.Repositery
 
         Task<Steps?> GetByIdAsync(int id);
 
+        Task<IEnumerable<Steps>> GetStepsByRoamapIdAsync(int roadMapId);
+
+
         Task UpdateAsync(Steps step);
 
         Task DeleteAsync(int id);
@@ -56,6 +59,12 @@ namespace HR_Carrer.Data.Repositery
         public async Task<IEnumerable<Steps>> GetAllAsync()
         {
             return await _context.Steps.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Steps>> GetStepsByRoamapIdAsync(int roadMapId)
+        {
+            return await _context.Steps.AsNoTracking().Where(s => s.RoadmapId == roadMapId).ToListAsync();
+
         }
 
         public async Task<Steps?> GetByIdAsync(int id)

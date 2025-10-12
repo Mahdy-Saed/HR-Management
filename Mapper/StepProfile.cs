@@ -10,7 +10,7 @@ namespace HR_Carrer.Mapper
         {
             CreateMap<StepsRequestDto, Steps>();
 
-            CreateMap<Steps, StepsResponceDto>();
+            CreateMap<Steps, StepsResponceDto>().ForMember(des => des.CertificateId, opt => opt.MapFrom(src=>src.CertificateId));
         }
 
 

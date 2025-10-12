@@ -9,7 +9,10 @@ namespace HR_Carrer.Dto.StepDtos
 
         public string? Name { get; set; }
 
+        public int CertificateId { get; set; }
+
         public StepStatus? Status { get; set; }
+
 
     }
 }

@@ -30,12 +30,11 @@
 
 
 
-
-
+    
     public enum DifficulityLevel
     {
         easy,
-        middle,
+        intermediate,
         hard
     }
 

@@ -11,6 +11,13 @@ namespace HR_Carrer.Mapper
             CreateMap<RoadmapRequestDto, Roadmap>();
 
             CreateMap<Roadmap, RoadmapResponceDto>();
+
+
+
+            CreateMap<DateTime, DateOnly>().ConvertUsing(src => DateOnly.FromDateTime(src));
+            CreateMap<DateOnly, DateTime>().ConvertUsing(src => src.ToDateTime(TimeOnly.MinValue));
+
+
         }
 
 

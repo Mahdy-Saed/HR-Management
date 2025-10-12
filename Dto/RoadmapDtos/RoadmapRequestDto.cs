@@ -40,10 +40,11 @@ namespace HR_Carrer.Dto.RoadmapDtos
 
 
 
+
         public enum DifficulityLevel
         {
             easy,
-            middle,
+            intermediate,
             hard
         }
 
