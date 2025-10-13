@@ -1,5 +1,6 @@
 ﻿using HR_Carrer.Dto.CertificateDtos;
 using HR_Carrer.Services.CertificateService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +18,9 @@ namespace HR_Carrer.Controllers
             _certificateService = certificateServcie;
         }
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPost]
-
         public async Task<IActionResult> CreateCertificate([FromBody]CertificateRequestDto certificateRequestDto)
         {
             if (certificateRequestDto is null)
@@ -32,8 +33,9 @@ namespace HR_Carrer.Controllers
 
         }
 
-        [HttpPost("{CertificateId}/AddSkillsToCertificate")]
+        [Authorize(Roles = "Admin")]
 
+        [HttpPost("{CertificateId}/AddSkillsToCertificate")]
         public async Task<IActionResult> AddSkillsToCertificate([FromRoute] int CertificateId,[FromBody] CertificateSkillsReqDto certificateSkillsReq)
         {
             if (CertificateId <0 || certificateSkillsReq is null)
@@ -50,6 +52,7 @@ namespace HR_Carrer.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
 
         [HttpGet]
         public async Task<IActionResult> GetAllCertificates([FromQuery]int?id=null , [FromQuery] string? name=null,
@@ -61,6 +64,7 @@ namespace HR_Carrer.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
 
         [HttpGet("{id}/CoveredSkills")]
         public async Task<IActionResult> GetCertificateWithSkills([FromRoute]int id)
@@ -71,6 +75,7 @@ namespace HR_Carrer.Controllers
             return StatusCode(responce.StatusCode, responce);
         }
 
+        [Authorize(Roles = "Admin,User")]
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCertificate([FromRoute]int? id)
@@ -83,6 +88,7 @@ namespace HR_Carrer.Controllers
             return StatusCode(responce.StatusCode, responce);
         }
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCertificate([FromRoute]int id, [FromQuery] CertificateUpdateDto certificateRequestDto)

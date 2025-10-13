@@ -17,7 +17,7 @@ namespace HR_Carrer.Controllers
         }
 
         /// <remarks> Note:Need the privilage of "Amdin"</remarks>
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("CreateEmployee/{id}")]
         public async Task<IActionResult> CreateEmployee([FromRoute] Guid id, [FromBody] EmployeeRequestDto employeeRequestDto)
         {
@@ -28,7 +28,7 @@ namespace HR_Carrer.Controllers
             return StatusCode(responce.StatusCode, responce);
         }
 
-
+        [Authorize(Roles = "Admin,User")]
         [HttpPut]
         public async Task<IActionResult> UpdateEmployee([FromBody] EmployeeUpdateDto employeeUpdate)
         {
@@ -43,6 +43,7 @@ namespace HR_Carrer.Controllers
 
             return StatusCode(responce.StatusCode, responce);
         }
+        [Authorize(Roles = "Admin,User")]
 
         [HttpGet]
         [Route("id")]
@@ -57,6 +58,7 @@ namespace HR_Carrer.Controllers
 
             return StatusCode(responce.StatusCode, responce);
         }
+        [Authorize(Roles = "Admin,User")]
 
         [HttpPut]
         [Route("ChangePassword")]
@@ -72,7 +74,7 @@ namespace HR_Carrer.Controllers
         }
 
 
-
+        [Authorize(Roles = "Admin,User")]
         [HttpDelete]
         public async Task<IActionResult> DeleteEmployee()
         {

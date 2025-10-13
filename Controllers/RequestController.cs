@@ -19,6 +19,7 @@ namespace HR_Carrer.Controllers
 
 
         // .................................(Create-Request).......................................
+        [Authorize(Roles = "User")]
 
         [HttpPost("Create")]
         public async Task<IActionResult> CreateRequest(Guid id, [FromForm] ReqeustCreateDto reqeustCreateDto)
@@ -45,6 +46,7 @@ namespace HR_Carrer.Controllers
 
         // .................................(Get-Requests).......................................
 
+        [Authorize(Roles = "Admin,User")]
 
         [HttpGet("Requests")]
         public async Task<IActionResult> GetRequests([FromQuery] int? id = null, [FromQuery] string? name = null, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
@@ -63,7 +65,7 @@ namespace HR_Carrer.Controllers
 
         // .................................(Update-Requests).......................................
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRequestStatus(int id,[FromQuery] RequestStatusDto requestStatusDto)

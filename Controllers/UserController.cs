@@ -23,7 +23,7 @@ namespace HR_Carrer.Controllers
         }
         //................................................(Create-User).....................................................
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateUser([FromBody] UserRequestDto userRequestDto)
         {
@@ -39,7 +39,7 @@ namespace HR_Carrer.Controllers
 
         //................................................(Get-All-Users).....................................................
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("Users")]
         public async Task<IActionResult> GetUsers([FromQuery] Guid? id , [FromQuery] string? name ,[FromQuery] string? email,
                                                     [FromQuery] int pageNumber = 1,    [FromQuery] int pageSize = 10 )
@@ -56,7 +56,7 @@ namespace HR_Carrer.Controllers
         //................................................(Update-User).....................................................
 
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,User")]
          [HttpPut("{id}")]
         public async Task<IActionResult>UpdateUser( Guid id , [FromBody] UserUpdateDto userUpdateDto)
         {
@@ -78,7 +78,8 @@ namespace HR_Carrer.Controllers
         ///  <returns>will return the User with new information </returns>
 
         //[Authorize(Roles = "Admin")]
-         [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin,User")]
+        [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateSepcific(Guid id, [FromBody] JsonPatchDocument< UserUpdateDto> userUpdateDto)
         {
             if (userUpdateDto == null)
@@ -91,7 +92,7 @@ namespace HR_Carrer.Controllers
         }
 
         //................................................(Delete-User).....................................................
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,User")]
          [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
@@ -104,7 +105,7 @@ namespace HR_Carrer.Controllers
 
         //................................................(Delete-All-Users).....................................................
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
          [HttpDelete("DeleteAll")]
         public async Task<IActionResult> DeleteAllUsers()
         {

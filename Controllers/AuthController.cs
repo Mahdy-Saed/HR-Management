@@ -19,7 +19,7 @@ namespace HR_Carrer.Controllers
              _authService= authService;
         }
 
-
+        [Authorize(Roles ="Admin,User")]
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult>login(AuthLogReqDto logReq)
@@ -44,6 +44,7 @@ namespace HR_Carrer.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin,User")]
         [Route("getNewToken")]
         public async Task<IActionResult> Refresh([FromBody] AuthRefeshDto auth)
         {

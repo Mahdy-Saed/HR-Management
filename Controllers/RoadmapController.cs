@@ -5,6 +5,7 @@ using HR_Carrer.Services.CertificateService;
 using HR_Carrer.Services.EmployeeService;
 using HR_Carrer.Services.RoadmapService;
 using HR_Carrer.Services.StepService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,13 +25,13 @@ namespace HR_Carrer.Controllers
 
 
         //..........................................................(Create-RoadMap).................................................
-        
+
         /// <param name="EmployeeId"> The Id of employee Required</param>
         /// <param name="roadmapRequestDto">
         /// Difficulty(easy,intermediate, hard)
         /// </param>
         /// <returns></returns>
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("{EmployeeId}")]
         public async Task<IActionResult> CreateRoadmap([FromRoute] Guid EmployeeId, RoadmapRequestDto roadmapRequestDto)
         {
@@ -46,6 +47,7 @@ namespace HR_Carrer.Controllers
 
         //..........................................................(Get-All-RoadMaps).................................................
 
+        [Authorize(Roles = "Admin")]
 
         [HttpGet]
         public async Task<IActionResult> GetRoadMaps([FromQuery] int? id, [FromQuery] string? title,
@@ -62,7 +64,7 @@ namespace HR_Carrer.Controllers
 
         //..........................................................(Get-RoadMap).................................................
 
-
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRoadMap([FromRoute] int id)
         {
@@ -76,6 +78,7 @@ namespace HR_Carrer.Controllers
         }
         //..........................................................(Update-RoadMap).................................................
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRoadMap([FromRoute] int id, RoadmapUpdateDto roadmapUpdateDto)
@@ -93,6 +96,7 @@ namespace HR_Carrer.Controllers
         }
         //..........................................................(Delete-RoadMap).................................................
 
+        [Authorize(Roles = "Admin")]
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoadMap([FromRoute] int id)
@@ -108,6 +112,7 @@ namespace HR_Carrer.Controllers
         }
 
         //..........................................................(Create-Steps-For RoadMap).................................................
+        [Authorize(Roles = "Admin")]
 
         [HttpPost("{RoadMapId}/steps")]
         public async Task<IActionResult> CreateStep([FromRoute] int RoadMapId, StepsRequestDto stepsRequest)
@@ -125,6 +130,7 @@ namespace HR_Carrer.Controllers
 
         //..........................................................(get-All-Steps Of RoadMap).................................................
 
+        [Authorize(Roles = "Admin,User")]
 
         [HttpGet("{RoadMapId}/steps")]
         public async Task<IActionResult> GetSteps([FromRoute] int RoadMapId)
@@ -141,6 +147,7 @@ namespace HR_Carrer.Controllers
 
         //..........................................................(get-on- Step).................................................
 
+        [Authorize(Roles = "Admin,User")]
 
         [HttpGet("{RoadMapId}/steps/{stepId}")]
         public async Task<IActionResult> GetStep([FromRoute] int RoadMapId, [FromRoute] int stepId)
@@ -166,6 +173,7 @@ namespace HR_Carrer.Controllers
         /// <returns></returns>
 
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPut("{RoadMapId}/steps/{stepId}")]
         public async Task<IActionResult> UpdateStep([FromRoute] int RoadMapId, [FromRoute] int stepId, StepUpdateDto stepUpdateDto)
@@ -182,6 +190,7 @@ namespace HR_Carrer.Controllers
         }
 
         //..........................................................(Delete-step).................................................
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{RoadMapId}/steps/{stepId}")]
         public async Task<IActionResult> DelteStep([FromRoute] int RoadMapId, [FromRoute] int stepId)
         {

@@ -1,5 +1,6 @@
 ﻿using HR_Carrer.Dto.SkillsDtos;
 using HR_Carrer.Services.SkillService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
@@ -17,7 +18,7 @@ namespace HR_Carrer.Controllers
             _skillService = skillService;
         }
 
-
+        [Authorize(Roles = "Admin,User")]
         [HttpGet]
         public async Task<IActionResult> GetAllSkills([FromQuery] int? id, [FromQuery] string? name,
                                                     [FromQuery] int pageNumber = 1,    [FromQuery] int pageSize = 10 )
@@ -28,6 +29,7 @@ namespace HR_Carrer.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPost]
         public async Task<IActionResult> CereateSkill(SkillCreateDto  skillCreateDto)
@@ -42,6 +44,7 @@ namespace HR_Carrer.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPut("{id}")]
 
@@ -53,9 +56,10 @@ namespace HR_Carrer.Controllers
 
             return StatusCode(responce.StatusCode, responce);
         }
-        
-        
 
+
+
+        [Authorize(Roles = "Admin")]
 
 
         [HttpDelete("{id}")]
