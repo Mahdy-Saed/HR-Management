@@ -83,7 +83,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API v1", Version = "v1", Description = "An API for beautiful HR system" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "HR Managment API", Version = "v1", Description = "An API for beautiful HR system" });
 
     // Bearer Token Authentication
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
